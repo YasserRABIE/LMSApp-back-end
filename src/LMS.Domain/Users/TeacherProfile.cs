@@ -42,16 +42,6 @@ public sealed class TeacherProfile : Entity<Guid>
     /// </summary>
     public string? ProfileImageUrl { get; private set; }
 
-    /// <summary>
-    /// When the profile was created
-    /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
-
-    /// <summary>
-    /// When the profile was last updated
-    /// </summary>
-    public DateTime? UpdatedAtUtc { get; private set; }
-
     // Navigation properties
     // public User User { get; private set; } = null!;
 
@@ -91,27 +81,21 @@ public sealed class TeacherProfile : Entity<Guid>
         if (!string.IsNullOrWhiteSpace(bio) && bio.Length > 2000)
         {
             return Result<TeacherProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Bio cannot exceed 2000 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
         if (!string.IsNullOrWhiteSpace(specialization) && specialization.Length > 200)
         {
             return Result<TeacherProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Specialization cannot exceed 200 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
         if (yearsOfExperience.HasValue && yearsOfExperience.Value < 0)
         {
             return Result<TeacherProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Years of experience cannot be negative",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -143,9 +127,7 @@ public sealed class TeacherProfile : Entity<Guid>
             if (bio.Length > 2000)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "Bio cannot exceed 2000 characters",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
             Bio = bio;
@@ -156,9 +138,7 @@ public sealed class TeacherProfile : Entity<Guid>
             if (specialization.Length > 200)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "Specialization cannot exceed 200 characters",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
             Specialization = specialization;
@@ -169,9 +149,7 @@ public sealed class TeacherProfile : Entity<Guid>
             if (yearsOfExperience.Value < 0)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "Years of experience cannot be negative",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
             YearsOfExperience = yearsOfExperience;

@@ -5,9 +5,6 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.Logout;
 
-/// <summary>
-/// Handler for LogoutCommand
-/// </summary>
 public sealed class LogoutCommandHandler : IRequestHandler<LogoutCommand, ApiResult>
 {
     private readonly IUserRepository _userRepository;
@@ -32,7 +29,7 @@ public sealed class LogoutCommandHandler : IRequestHandler<LogoutCommand, ApiRes
         if (session is null)
             return ApiResult.Fail(
                 ErrorCodes.Auth.SessionNotFound,
-                "Session not found",
+                ErrorMessages.GetMessage(ErrorCodes.Auth.SessionNotFound),
                 HttpStatusCodes.NotFound);
 
         // 2. Revoke session
@@ -40,12 +37,12 @@ public sealed class LogoutCommandHandler : IRequestHandler<LogoutCommand, ApiRes
         if (revokeResult.IsFailure)
             return ApiResult.Fail(
                 revokeResult.Error.Code,
-                revokeResult.Error.Message,
+                ErrorMessages.GetMessage(revokeResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
         _userRepository.UpdateSession(session);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return ApiResult.Ok("Logged out successfully", HttpStatusCodes.Ok);
+        return ApiResult.Ok(SuccessMessages.LogoutSuccess);
     }
 }

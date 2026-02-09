@@ -49,11 +49,6 @@ public sealed class DeviceSession : Entity<Guid>
     public string? UserAgent { get; private set; }
 
     /// <summary>
-    /// When the session was created
-    /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
-
-    /// <summary>
     /// When the session was last accessed
     /// </summary>
     public DateTime LastAccessedAtUtc { get; private set; }
@@ -113,36 +108,28 @@ public sealed class DeviceSession : Entity<Guid>
         if (string.IsNullOrWhiteSpace(deviceFingerprintHash))
         {
             return Result<DeviceSession>.Failure(
-                ErrorCodes.Validation.Required,
-                "Device fingerprint is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (string.IsNullOrWhiteSpace(platform))
         {
             return Result<DeviceSession>.Failure(
-                ErrorCodes.Validation.Required,
-                "Platform is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
             return Result<DeviceSession>.Failure(
-                ErrorCodes.Validation.Required,
-                "Refresh token is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (refreshTokenExpiresAtUtc <= DateTime.UtcNow)
         {
             return Result<DeviceSession>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Refresh token expiration must be in the future",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -168,36 +155,28 @@ public sealed class DeviceSession : Entity<Guid>
         if (!IsActive)
         {
             return Result.Failure(
-                ErrorCodes.Auth.SessionRevoked,
-                "Session is not active",
-                ErrorType.Forbidden
+                Error.Forbidden(ErrorCodes.Auth.SessionRevoked)
             );
         }
 
         if (RefreshTokenExpiresAtUtc < DateTime.UtcNow)
         {
             return Result.Failure(
-                ErrorCodes.Auth.RefreshTokenExpired,
-                "Refresh token has expired",
-                ErrorType.Unauthorized
+                Error.Unauthorized(ErrorCodes.Auth.RefreshTokenExpired)
             );
         }
 
         if (string.IsNullOrWhiteSpace(newRefreshToken))
         {
             return Result.Failure(
-                ErrorCodes.Validation.Required,
-                "New refresh token is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (newExpiresAtUtc <= DateTime.UtcNow)
         {
             return Result.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "New refresh token expiration must be in the future",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -221,9 +200,7 @@ public sealed class DeviceSession : Entity<Guid>
         if (!IsActive)
         {
             return Result.Failure(
-                ErrorCodes.Auth.SessionRevoked,
-                "Session is already revoked",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Auth.SessionRevoked)
             );
         }
 

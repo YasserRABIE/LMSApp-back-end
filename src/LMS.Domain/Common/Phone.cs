@@ -33,9 +33,7 @@ public sealed class Phone : ValueObject
         if (string.IsNullOrWhiteSpace(phone))
         {
             return Result<Phone>.Failure(
-                ErrorCodes.User.InvalidPhone,
-                "Phone number is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.User.InvalidPhone)
             );
         }
 
@@ -55,9 +53,7 @@ public sealed class Phone : ValueObject
         if (!PhoneRegex.IsMatch(cleanedPhone))
         {
             return Result<Phone>.Failure(
-                ErrorCodes.User.InvalidPhone,
-                "Invalid Egyptian phone number format. Expected format: 01XXXXXXXXX",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.User.InvalidPhone)
             );
         }
 

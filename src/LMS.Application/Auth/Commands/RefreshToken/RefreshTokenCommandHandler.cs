@@ -6,9 +6,6 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.RefreshToken;
 
-/// <summary>
-/// Handler for RefreshTokenCommand
-/// </summary>
 public sealed class RefreshTokenCommandHandler
     : IRequestHandler<RefreshTokenCommand, ApiResult<AuthTokensDto>>
 {
@@ -37,14 +34,14 @@ public sealed class RefreshTokenCommandHandler
         if (session is null)
             return ApiResult<AuthTokensDto>.Fail(
                 ErrorCodes.Auth.InvalidRefreshToken,
-                "Invalid refresh token",
+                ErrorMessages.GetMessage(ErrorCodes.Auth.InvalidRefreshToken),
                 HttpStatusCodes.Unauthorized);
 
         // 2. Validate refresh token
         if (!session.IsRefreshTokenValid())
             return ApiResult<AuthTokensDto>.Fail(
                 ErrorCodes.Auth.RefreshTokenExpired,
-                "Refresh token has expired",
+                ErrorMessages.GetMessage(ErrorCodes.Auth.RefreshTokenExpired),
                 HttpStatusCodes.Unauthorized);
 
         // 3. Get user
@@ -52,7 +49,7 @@ public sealed class RefreshTokenCommandHandler
         if (user is null)
             return ApiResult<AuthTokensDto>.Fail(
                 ErrorCodes.User.NotFound,
-                "User not found",
+                ErrorMessages.GetMessage(ErrorCodes.User.NotFound),
                 HttpStatusCodes.NotFound);
 
         // 4. Check if user can login
@@ -60,7 +57,7 @@ public sealed class RefreshTokenCommandHandler
         if (canLoginResult.IsFailure)
             return ApiResult<AuthTokensDto>.Fail(
                 canLoginResult.Error.Code,
-                canLoginResult.Error.Message,
+                ErrorMessages.GetMessage(canLoginResult.Error.Code),
                 HttpStatusCodes.Forbidden);
 
         // 5. Generate new tokens
@@ -72,7 +69,7 @@ public sealed class RefreshTokenCommandHandler
         if (refreshResult.IsFailure)
             return ApiResult<AuthTokensDto>.Fail(
                 refreshResult.Error.Code,
-                refreshResult.Error.Message,
+                ErrorMessages.GetMessage(refreshResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
         _userRepository.UpdateSession(session);
@@ -87,6 +84,6 @@ public sealed class RefreshTokenCommandHandler
             newRefreshToken,
             newRefreshTokenExpiry);
 
-        return ApiResult<AuthTokensDto>.Ok(tokens, HttpStatusCodes.Ok);
+        return ApiResult<AuthTokensDto>.Ok(tokens, SuccessMessages.TokenRefreshed);
     }
 }

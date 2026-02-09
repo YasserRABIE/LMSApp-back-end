@@ -1,50 +1,58 @@
 using LMS.Application.Common.Interfaces;
+using LMS.Application.Common.Settings;
 using LMS.Domain.Common;
 using LMS.Infrastructure.Caching;
+using LMS.Infrastructure.ExternalServices.SmsMisr;
+using Microsoft.Extensions.Options;
 
 namespace LMS.Infrastructure.Services;
 
 /// <summary>
-/// OTP service implementation using Redis for storage
+/// OTP service implementation using Redis for storage and SMS for delivery
 /// </summary>
 public sealed class OtpService : IOtpService
 {
     private readonly RedisCacheService _cache;
-    private const int OtpLength = 6;
-    private const int OtpExpiryMinutes = 10;
+    private readonly AuthenticationSettings _authSettings;
+    private readonly SmsMisrOtpService? _smsService;
     private const int VerificationTokenExpiryMinutes = 15;
-    private const int RateLimitWindowMinutes = 5;
-    private const int MaxOtpAttemptsPerWindow = 3;
 
     // Redis key patterns
     private const string OtpKeyPattern = "otp:{0}"; // otp:phone
     private const string RateLimitKeyPattern = "otp:ratelimit:{0}"; // otp:ratelimit:phone
     private const string VerificationTokenKeyPattern = "otp:verification:{0}"; // otp:verification:token
 
-    public OtpService(RedisCacheService cache)
+    public OtpService(
+        RedisCacheService cache,
+        IOptions<AuthenticationSettings> authSettings,
+        SmsMisrOtpService? smsService = null)
     {
         _cache = cache;
+        _authSettings = authSettings.Value;
+        _smsService = smsService;
     }
 
     public async Task<string> GenerateOtpAsync(string phone, CancellationToken cancellationToken = default)
     {
-        // Generate 6-digit OTP
+        // Generate OTP with configured length
         var random = new Random();
-        var otp = random.Next(100000, 999999).ToString();
+        var minValue = (int)Math.Pow(10, _authSettings.OtpLength - 1);
+        var maxValue = (int)Math.Pow(10, _authSettings.OtpLength) - 1;
+        var otp = random.Next(minValue, maxValue).ToString();
 
-        // Store in Redis with expiry
+        // Store in Redis with expiry from settings
         var key = string.Format(OtpKeyPattern, phone);
         await _cache.SetStringAsync(
             key,
             otp,
-            TimeSpan.FromMinutes(OtpExpiryMinutes),
+            TimeSpan.FromMinutes(_authSettings.OtpExpiryMinutes),
             cancellationToken);
 
-        // Increment rate limit counter
+        // Increment rate limit counter with cooldown from settings
         var rateLimitKey = string.Format(RateLimitKeyPattern, phone);
         await _cache.IncrementAsync(
             rateLimitKey,
-            TimeSpan.FromMinutes(RateLimitWindowMinutes),
+            TimeSpan.FromMinutes(_authSettings.OtpCooldownMinutes),
             cancellationToken);
 
         return otp;
@@ -52,6 +60,13 @@ public sealed class OtpService : IOtpService
 
     public async Task<bool> VerifyOtpAsync(string phone, string code, CancellationToken cancellationToken = default)
     {
+        // Development bypass: accept any code (or use fixed "000000")
+        if (_authSettings.BypassOtpInDevelopment)
+        {
+            Console.WriteLine($"[OTP Service - DEV MODE] Bypassing OTP verification for {phone}. Code: {code} accepted.");
+            return true;
+        }
+
         var key = string.Format(OtpKeyPattern, phone);
         var storedOtp = await _cache.GetStringAsync(key, cancellationToken);
 
@@ -71,18 +86,17 @@ public sealed class OtpService : IOtpService
 
     public async Task<Result> SendOtpSmsAsync(string phone, string code, CancellationToken cancellationToken = default)
     {
-        // TODO: Integrate with SMS provider (Vonage/Twilio)
-        // For now, just log the OTP (in production, this should send actual SMS)
+        // If SMS service is available, use it
+        if (_smsService != null)
+        {
+            return await _smsService.SendSmsOtpAsync(
+                phone,
+                code,
+                _authSettings.OtpExpiryMinutes,
+                cancellationToken);
+        }
 
-        // Development mode - just return success
-        // In production, call actual SMS API:
-        // - Vonage SMS API
-        // - Twilio SMS API
-        // - etc.
-
-        await Task.CompletedTask;
-
-        // For development/testing - log the OTP
+        // Fallback to console logging for development/testing
         Console.WriteLine($"[OTP Service] Sending OTP {code} to {phone}");
 
         return Result.Success();
@@ -93,7 +107,7 @@ public sealed class OtpService : IOtpService
         var rateLimitKey = string.Format(RateLimitKeyPattern, phone);
         var attempts = await _cache.GetAsync<int>(rateLimitKey, cancellationToken);
 
-        return attempts >= MaxOtpAttemptsPerWindow;
+        return attempts >= _authSettings.OtpMaxAttempts;
     }
 
     public async Task<string> GenerateVerificationTokenAsync(string phone, CancellationToken cancellationToken = default)

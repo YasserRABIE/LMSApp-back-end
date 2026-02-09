@@ -5,9 +5,6 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.SendOtp;
 
-/// <summary>
-/// Handler for SendOtpCommand
-/// </summary>
 public sealed class SendOtpCommandHandler : IRequestHandler<SendOtpCommand, ApiResult>
 {
     private readonly IOtpService _otpService;
@@ -32,7 +29,7 @@ public sealed class SendOtpCommandHandler : IRequestHandler<SendOtpCommand, ApiR
         if (isRateLimited)
             return ApiResult.Fail(
                 ErrorCodes.User.OtpRateLimitExceeded,
-                "Too many OTP requests. Please try again in 5 minutes",
+                ErrorMessages.GetMessage(ErrorCodes.User.OtpRateLimitExceeded),
                 HttpStatusCodes.TooManyRequests);
 
         // 2. Validate phone format
@@ -40,7 +37,7 @@ public sealed class SendOtpCommandHandler : IRequestHandler<SendOtpCommand, ApiR
         if (phoneResult.IsFailure)
             return ApiResult.Fail(
                 phoneResult.Error.Code,
-                phoneResult.Error.Message,
+                ErrorMessages.GetMessage(phoneResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
         // 3. Check if phone is already registered
@@ -50,7 +47,7 @@ public sealed class SendOtpCommandHandler : IRequestHandler<SendOtpCommand, ApiR
         if (existingUser is not null)
             return ApiResult.Fail(
                 ErrorCodes.User.PhoneAlreadyExists,
-                "Phone number already registered",
+                ErrorMessages.GetMessage(ErrorCodes.User.PhoneAlreadyExists),
                 HttpStatusCodes.Conflict);
 
         // 4. Generate OTP
@@ -64,9 +61,9 @@ public sealed class SendOtpCommandHandler : IRequestHandler<SendOtpCommand, ApiR
         if (sendResult.IsFailure)
             return ApiResult.Fail(
                 sendResult.Error.Code,
-                sendResult.Error.Message,
+                ErrorMessages.GetMessage(sendResult.Error.Code),
                 HttpStatusCodes.InternalServerError);
 
-        return ApiResult.Ok("OTP sent successfully", HttpStatusCodes.Ok);
+        return ApiResult.Ok(SuccessMessages.OtpSent);
     }
 }

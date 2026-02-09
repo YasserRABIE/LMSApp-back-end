@@ -1,7 +1,8 @@
 namespace LMS.Domain.Common;
 
 /// <summary>
-/// Represents an error with a code and message
+/// Represents a domain error with code and type (message-agnostic following Clean Architecture).
+/// Messages are added in the Application layer via ErrorMessages.cs for localization support.
 /// </summary>
 public sealed record Error
 {
@@ -11,62 +12,75 @@ public sealed record Error
     public string Code { get; }
 
     /// <summary>
-    /// Human-readable error message
-    /// </summary>
-    public string Message { get; }
-
-    /// <summary>
-    /// Error type for categorization
+    /// Error type for categorization and HTTP status code mapping
     /// </summary>
     public ErrorType Type { get; }
 
-    private Error(string code, string message, ErrorType type)
+    /// <summary>
+    /// Optional technical description for logging/debugging (NOT for end users)
+    /// </summary>
+    public string? Description { get; }
+
+    private Error(string code, ErrorType type, string? description = null)
     {
         Code = code;
-        Message = message;
         Type = type;
+        Description = description;
     }
 
     /// <summary>
-    /// Creates a new error
+    /// Creates a new error with optional technical description
     /// </summary>
-    public static Error Create(string code, string message, ErrorType type = ErrorType.Failure)
-        => new(code, message, type);
+    /// <param name="code">Error code from ErrorCodes class</param>
+    /// <param name="type">Error type for categorization</param>
+    /// <param name="description">Optional technical description for logs (NOT user-facing)</param>
+    public static Error Create(string code, ErrorType type = ErrorType.Failure, string? description = null)
+        => new(code, type, description);
 
     /// <summary>
     /// Creates a validation error
     /// </summary>
-    public static Error Validation(string code, string message)
-        => new(code, message, ErrorType.Validation);
+    /// <param name="code">Error code from ErrorCodes.Validation class</param>
+    /// <param name="description">Optional technical description for logs</param>
+    public static Error Validation(string code, string? description = null)
+        => new(code, ErrorType.Validation, description);
 
     /// <summary>
     /// Creates a not found error
     /// </summary>
-    public static Error NotFound(string code, string message)
-        => new(code, message, ErrorType.NotFound);
+    /// <param name="code">Error code indicating entity not found</param>
+    /// <param name="description">Optional technical description for logs</param>
+    public static Error NotFound(string code, string? description = null)
+        => new(code, ErrorType.NotFound, description);
 
     /// <summary>
-    /// Creates a conflict error
+    /// Creates a conflict error (uniqueness violation, state conflict)
     /// </summary>
-    public static Error Conflict(string code, string message)
-        => new(code, message, ErrorType.Conflict);
+    /// <param name="code">Error code indicating conflict</param>
+    /// <param name="description">Optional technical description for logs</param>
+    public static Error Conflict(string code, string? description = null)
+        => new(code, ErrorType.Conflict, description);
 
     /// <summary>
-    /// Creates an unauthorized error
+    /// Creates an unauthorized error (authentication failure)
     /// </summary>
-    public static Error Unauthorized(string code, string message)
-        => new(code, message, ErrorType.Unauthorized);
+    /// <param name="code">Error code indicating authentication failure</param>
+    /// <param name="description">Optional technical description for logs</param>
+    public static Error Unauthorized(string code, string? description = null)
+        => new(code, ErrorType.Unauthorized, description);
 
     /// <summary>
-    /// Creates a forbidden error
+    /// Creates a forbidden error (authorization failure)
     /// </summary>
-    public static Error Forbidden(string code, string message)
-        => new(code, message, ErrorType.Forbidden);
+    /// <param name="code">Error code indicating insufficient permissions</param>
+    /// <param name="description">Optional technical description for logs</param>
+    public static Error Forbidden(string code, string? description = null)
+        => new(code, ErrorType.Forbidden, description);
 
     /// <summary>
     /// No error (success state)
     /// </summary>
-    public static readonly Error None = new(string.Empty, string.Empty, ErrorType.None);
+    public static readonly Error None = new(string.Empty, ErrorType.None);
 }
 
 /// <summary>

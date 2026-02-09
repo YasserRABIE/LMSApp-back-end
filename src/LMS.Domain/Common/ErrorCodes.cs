@@ -120,6 +120,25 @@ public static class ErrorCodes
         public const string AlreadyUsed = "PROMO_CODE.ALREADY_USED";
     }
 
+    // ===== WHATSAPP ERRORS ===== (Reserved for future WhatsApp integration)
+    public static class WhatsApp
+    {
+        public const string SendFailed = "WHATSAPP.SEND_FAILED";
+        public const string InvalidRecipient = "WHATSAPP.INVALID_RECIPIENT";
+        public const string RateLimitExceeded = "WHATSAPP.RATE_LIMIT_EXCEEDED";
+        public const string TemplateNotApproved = "WHATSAPP.TEMPLATE_NOT_APPROVED";
+    }
+
+    // ===== SMS ERRORS =====
+    public static class Sms
+    {
+        public const string SendFailed = "SMS.SEND_FAILED";
+        public const string InvalidCredentials = "SMS.INVALID_CREDENTIALS";
+        public const string InsufficientBalance = "SMS.INSUFFICIENT_BALANCE";
+        public const string InvalidRecipient = "SMS.INVALID_RECIPIENT";
+        public const string RateLimitExceeded = "SMS.RATE_LIMIT_EXCEEDED";
+    }
+
     // ===== VALIDATION ERRORS =====
     public static class Validation
     {
@@ -127,6 +146,31 @@ public static class ErrorCodes
         public const string Required = "VALIDATION.REQUIRED";
         public const string InvalidFormat = "VALIDATION.INVALID_FORMAT";
         public const string OutOfRange = "VALIDATION.OUT_OF_RANGE";
+
+        // Field-specific validation
+        public const string PhoneRequired = "VALIDATION.PHONE_REQUIRED";
+        public const string PhoneInvalidFormat = "VALIDATION.PHONE_INVALID_FORMAT";
+        public const string PasswordRequired = "VALIDATION.PASSWORD_REQUIRED";
+        public const string PasswordMinLength = "VALIDATION.PASSWORD_MIN_LENGTH";
+        public const string PasswordComplexity = "VALIDATION.PASSWORD_COMPLEXITY";
+        public const string FirstNameRequired = "VALIDATION.FIRST_NAME_REQUIRED";
+        public const string FirstNameMaxLength = "VALIDATION.FIRST_NAME_MAX_LENGTH";
+        public const string SecondNameRequired = "VALIDATION.SECOND_NAME_REQUIRED";
+        public const string SecondNameMaxLength = "VALIDATION.SECOND_NAME_MAX_LENGTH";
+        public const string LastNameRequired = "VALIDATION.LAST_NAME_REQUIRED";
+        public const string LastNameMaxLength = "VALIDATION.LAST_NAME_MAX_LENGTH";
+        public const string StudyLevelTrackRequired = "VALIDATION.STUDY_LEVEL_TRACK_REQUIRED";
+        public const string SchoolNameMaxLength = "VALIDATION.SCHOOL_NAME_MAX_LENGTH";
+        public const string GovernorateMaxLength = "VALIDATION.GOVERNORATE_MAX_LENGTH";
+        public const string DeviceFingerprintRequired = "VALIDATION.DEVICE_FINGERPRINT_REQUIRED";
+        public const string PlatformRequired = "VALIDATION.PLATFORM_REQUIRED";
+        public const string PlatformMaxLength = "VALIDATION.PLATFORM_MAX_LENGTH";
+        public const string RefreshTokenRequired = "VALIDATION.REFRESH_TOKEN_REQUIRED";
+        public const string OtpCodeRequired = "VALIDATION.OTP_CODE_REQUIRED";
+        public const string OtpCodeLength = "VALIDATION.OTP_CODE_LENGTH";
+        public const string OtpCodeDigitsOnly = "VALIDATION.OTP_CODE_DIGITS_ONLY";
+        public const string SessionIdRequired = "VALIDATION.SESSION_ID_REQUIRED";
+        public const string UserIdRequired = "VALIDATION.USER_ID_REQUIRED";
     }
 
     // ===== GENERAL ERRORS =====

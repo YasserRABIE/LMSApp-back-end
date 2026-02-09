@@ -1,4 +1,6 @@
 using FluentValidation;
+using LMS.Application.Common;
+using LMS.Domain.Common;
 
 namespace LMS.Application.Auth.Commands.VerifyOtp;
 
@@ -11,16 +13,16 @@ public sealed class VerifyOtpCommandValidator : AbstractValidator<VerifyOtpComma
     {
         RuleFor(x => x.Phone)
             .NotEmpty()
-            .WithMessage("Phone number is required")
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PhoneRequired))
             .Matches(@"^01[0-9]{9}$")
-            .WithMessage("Phone number must be in Egyptian format (01XXXXXXXXX)");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PhoneInvalidFormat));
 
         RuleFor(x => x.Code)
             .NotEmpty()
-            .WithMessage("OTP code is required")
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.OtpCodeRequired))
             .Length(6)
-            .WithMessage("OTP code must be 6 digits")
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.OtpCodeLength))
             .Matches(@"^\d{6}$")
-            .WithMessage("OTP code must contain only digits");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.OtpCodeDigitsOnly));
     }
 }

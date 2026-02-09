@@ -19,9 +19,19 @@ public sealed class User : AggregateRoot<UserId>
     public string PasswordHash { get; private set; }
 
     /// <summary>
-    /// User's full name
+    /// User's first name
     /// </summary>
-    public string FullName { get; private set; }
+    public string FirstName { get; private set; }
+
+    /// <summary>
+    /// User's second name (middle name)
+    /// </summary>
+    public string SecondName { get; private set; }
+
+    /// <summary>
+    /// User's last name
+    /// </summary>
+    public string LastName { get; private set; }
 
     /// <summary>
     /// Type of user (Student, Teacher, Assistant, Parent, Admin)
@@ -39,16 +49,6 @@ public sealed class User : AggregateRoot<UserId>
     public bool IsActive { get; private set; }
 
     /// <summary>
-    /// When the user was created
-    /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
-
-    /// <summary>
-    /// When the user was last updated
-    /// </summary>
-    public DateTime? UpdatedAtUtc { get; private set; }
-
-    /// <summary>
     /// Optional email for notifications only (not for authentication)
     /// </summary>
     public string? Email { get; private set; }
@@ -56,30 +56,40 @@ public sealed class User : AggregateRoot<UserId>
     // Navigation properties (loaded separately)
     // These will be populated by EF Core
 
+    /// <summary>
+    /// Gets the full name by concatenating first, second, and last names
+    /// </summary>
+    public string GetFullName() => $"{FirstName} {SecondName} {LastName}".Trim();
+
     // EF Core constructor
     private User() : base()
     {
         Phone = null!;
         PasswordHash = string.Empty;
-        FullName = string.Empty;
+        FirstName = string.Empty;
+        SecondName = string.Empty;
+        LastName = string.Empty;
     }
 
     private User(
         UserId id,
         Phone phone,
         string passwordHash,
-        string fullName,
+        string firstName,
+        string secondName,
+        string lastName,
         UserType userType,
         bool isPhoneVerified)
         : base(id)
     {
         Phone = phone;
         PasswordHash = passwordHash;
-        FullName = fullName;
+        FirstName = firstName;
+        SecondName = secondName;
+        LastName = lastName;
         UserType = userType;
         IsPhoneVerified = isPhoneVerified;
         IsActive = true;
-        CreatedAtUtc = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -88,7 +98,9 @@ public sealed class User : AggregateRoot<UserId>
     public static Result<User> Create(
         Phone phone,
         string passwordHash,
-        string fullName,
+        string firstName,
+        string secondName,
+        string lastName,
         UserType userType,
         bool isPhoneVerified = false)
     {
@@ -96,27 +108,49 @@ public sealed class User : AggregateRoot<UserId>
         if (string.IsNullOrWhiteSpace(passwordHash))
         {
             return Result<User>.Failure(
-                ErrorCodes.Validation.Required,
-                "Password hash is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
-        if (string.IsNullOrWhiteSpace(fullName))
+        if (string.IsNullOrWhiteSpace(firstName))
         {
             return Result<User>.Failure(
-                ErrorCodes.Validation.Required,
-                "Full name is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
-        if (fullName.Length > 200)
+        if (string.IsNullOrWhiteSpace(secondName))
         {
             return Result<User>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Full name cannot exceed 200 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
+            );
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName))
+        {
+            return Result<User>.Failure(
+                Error.Validation(ErrorCodes.Validation.Required)
+            );
+        }
+
+        if (firstName.Length > 100)
+        {
+            return Result<User>.Failure(
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
+            );
+        }
+
+        if (secondName.Length > 100)
+        {
+            return Result<User>.Failure(
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
+            );
+        }
+
+        if (lastName.Length > 100)
+        {
+            return Result<User>.Failure(
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -124,7 +158,9 @@ public sealed class User : AggregateRoot<UserId>
             UserId.New(),
             phone,
             passwordHash,
-            fullName,
+            firstName,
+            secondName,
+            lastName,
             userType,
             isPhoneVerified
         );
@@ -134,7 +170,9 @@ public sealed class User : AggregateRoot<UserId>
             user.Id,
             user.Phone,
             user.UserType,
-            user.FullName
+            user.FirstName,
+            user.SecondName,
+            user.LastName
         ));
 
         return Result<User>.Success(user);
@@ -152,7 +190,9 @@ public sealed class User : AggregateRoot<UserId>
             UserId.New(),
             phone,
             temporaryPasswordHash,
-            "Parent", // Default name, will be updated on first login
+            "Parent", // Default first name, will be updated on first login
+            "",
+            "",
             UserType.Parent,
             isPhoneVerified: true // Already verified during student link process
         );
@@ -161,7 +201,9 @@ public sealed class User : AggregateRoot<UserId>
             user.Id,
             user.Phone,
             user.UserType,
-            user.FullName
+            user.FirstName,
+            user.SecondName,
+            user.LastName
         ));
 
         return Result<User>.Success(user);
@@ -175,9 +217,7 @@ public sealed class User : AggregateRoot<UserId>
         if (IsPhoneVerified)
         {
             return Result.Failure(
-                ErrorCodes.User.AlreadyVerified,
-                "Phone number is already verified",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.User.AlreadyVerified)
             );
         }
 
@@ -197,9 +237,7 @@ public sealed class User : AggregateRoot<UserId>
         if (string.IsNullOrWhiteSpace(newPasswordHash))
         {
             return Result.Failure(
-                ErrorCodes.Validation.Required,
-                "Password hash is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
@@ -212,31 +250,57 @@ public sealed class User : AggregateRoot<UserId>
     /// <summary>
     /// Updates user's profile information
     /// </summary>
-    public Result UpdateProfile(string fullName, string? email = null)
+    public Result UpdateProfile(string firstName, string secondName, string lastName, string? email = null)
     {
-        if (string.IsNullOrWhiteSpace(fullName))
+        if (string.IsNullOrWhiteSpace(firstName))
         {
             return Result.Failure(
-                ErrorCodes.Validation.Required,
-                "Full name is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
-        if (fullName.Length > 200)
+        if (string.IsNullOrWhiteSpace(secondName))
         {
             return Result.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Full name cannot exceed 200 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
-        FullName = fullName;
+        if (string.IsNullOrWhiteSpace(lastName))
+        {
+            return Result.Failure(
+                Error.Validation(ErrorCodes.Validation.Required)
+            );
+        }
+
+        if (firstName.Length > 100)
+        {
+            return Result.Failure(
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
+            );
+        }
+
+        if (secondName.Length > 100)
+        {
+            return Result.Failure(
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
+            );
+        }
+
+        if (lastName.Length > 100)
+        {
+            return Result.Failure(
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
+            );
+        }
+
+        FirstName = firstName;
+        SecondName = secondName;
+        LastName = lastName;
         Email = email;
         UpdatedAtUtc = DateTime.UtcNow;
 
-        RaiseDomainEvent(new UserProfileUpdatedEvent(Id, FullName));
+        RaiseDomainEvent(new UserProfileUpdatedEvent(Id, FirstName, SecondName, LastName));
 
         return Result.Success();
     }
@@ -249,9 +313,7 @@ public sealed class User : AggregateRoot<UserId>
         if (!IsActive)
         {
             return Result.Failure(
-                ErrorCodes.User.Inactive,
-                "User is already inactive",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.User.Inactive)
             );
         }
 
@@ -271,9 +333,7 @@ public sealed class User : AggregateRoot<UserId>
         if (IsActive)
         {
             return Result.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "User is already active",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -291,18 +351,14 @@ public sealed class User : AggregateRoot<UserId>
         if (!IsActive)
         {
             return Result.Failure(
-                ErrorCodes.User.Inactive,
-                "User account is inactive",
-                ErrorType.Forbidden
+                Error.Forbidden(ErrorCodes.User.Inactive)
             );
         }
 
         if (!IsPhoneVerified)
         {
             return Result.Failure(
-                ErrorCodes.User.NotVerified,
-                "Phone number is not verified",
-                ErrorType.Forbidden
+                Error.Forbidden(ErrorCodes.User.NotVerified)
             );
         }
 

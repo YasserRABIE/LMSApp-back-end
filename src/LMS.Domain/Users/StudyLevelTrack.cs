@@ -54,18 +54,14 @@ public sealed class StudyLevelTrack : Entity<Guid>
         if (studyLevelId == Guid.Empty)
         {
             return Result<StudyLevelTrack>.Failure(
-                ErrorCodes.Validation.Required,
-                "Study level is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (trackId == Guid.Empty)
         {
             return Result<StudyLevelTrack>.Failure(
-                ErrorCodes.Validation.Required,
-                "Track is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 

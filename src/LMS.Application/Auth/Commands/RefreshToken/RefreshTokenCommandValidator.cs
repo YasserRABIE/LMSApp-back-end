@@ -1,4 +1,6 @@
 using FluentValidation;
+using LMS.Application.Common;
+using LMS.Domain.Common;
 
 namespace LMS.Application.Auth.Commands.RefreshToken;
 
@@ -11,6 +13,6 @@ public sealed class RefreshTokenCommandValidator : AbstractValidator<RefreshToke
     {
         RuleFor(x => x.RefreshToken)
             .NotEmpty()
-            .WithMessage("Refresh token is required");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.RefreshTokenRequired));
     }
 }

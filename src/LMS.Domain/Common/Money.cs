@@ -22,18 +22,14 @@ public sealed class Money : ValueObject
         if (amount < 0)
         {
             return Result<Money>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Amount cannot be negative",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
         if (string.IsNullOrWhiteSpace(currency))
         {
             return Result<Money>.Failure(
-                ErrorCodes.Validation.Required,
-                "Currency is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
@@ -41,9 +37,7 @@ public sealed class Money : ValueObject
         if (currency.ToUpperInvariant() != "EGP")
         {
             return Result<Money>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Only EGP currency is supported",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -53,7 +47,7 @@ public sealed class Money : ValueObject
     /// <summary>
     /// Creates zero money
     /// </summary>
-    public static Money Zero() => new(0, "EGP");
+    public static Money Zero() => new(0);
 
     /// <summary>
     /// Adds two money values

@@ -9,9 +9,21 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 {
     public TId Id { get; protected set; }
 
+    /// <summary>
+    /// When the entity was created
+    /// </summary>
+    public DateTime CreatedAtUtc { get; protected set; }
+
+    /// <summary>
+    /// When the entity was last updated
+    /// </summary>
+    public DateTime UpdatedAtUtc { get; protected set; }
+
     protected Entity(TId id)
     {
         Id = id;
+        CreatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -20,6 +32,8 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
     protected Entity()
     {
         Id = default!;
+        CreatedAtUtc = DateTime.UtcNow;
+        UpdatedAtUtc = DateTime.UtcNow;
     }
 
     public override bool Equals(object? obj)

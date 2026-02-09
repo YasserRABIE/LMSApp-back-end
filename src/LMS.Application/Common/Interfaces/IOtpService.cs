@@ -25,7 +25,7 @@ public interface IOtpService
     Task<bool> VerifyOtpAsync(string phone, string code, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Sends an OTP code via SMS
+    /// Sends an OTP code via WhatsApp
     /// </summary>
     /// <param name="phone">The phone number</param>
     /// <param name="code">The OTP code</param>

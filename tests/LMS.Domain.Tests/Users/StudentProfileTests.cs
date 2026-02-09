@@ -33,7 +33,7 @@ public sealed class StudentProfileTests
         profile.SchoolName.Should().Be("Cairo Secondary School");
         profile.Governorate.Should().Be("Cairo");
         profile.CreatedAtUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-        profile.UpdatedAtUtc.Should().BeNull();
+        profile.UpdatedAtUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
     [Fact]
@@ -57,8 +57,8 @@ public sealed class StudentProfileTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.REQUIRED");
-        result.Error.Message.Should().Contain("Study level and track must be selected");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.Required);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
@@ -75,8 +75,8 @@ public sealed class StudentProfileTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
-        result.Error.Message.Should().Contain("School name cannot exceed 200 characters");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
@@ -93,8 +93,8 @@ public sealed class StudentProfileTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
-        result.Error.Message.Should().Contain("Governorate cannot exceed 100 characters");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public sealed class StudentProfileTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         profile.SchoolName.Should().Be(newSchoolName);
-        profile.UpdatedAtUtc.Should().NotBeNull();
+        profile.UpdatedAtUtc.Should().BeOnOrAfter(profile.CreatedAtUtc);
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public sealed class StudentProfileTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         profile.Governorate.Should().Be(newGovernorate);
-        profile.UpdatedAtUtc.Should().NotBeNull();
+        profile.UpdatedAtUtc.Should().BeOnOrAfter(profile.CreatedAtUtc);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class StudentProfileTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         profile.StudyLevelTrackId.Should().Be(newStudyLevelTrackId);
-        profile.UpdatedAtUtc.Should().NotBeNull();
+        profile.UpdatedAtUtc.Should().BeOnOrAfter(profile.CreatedAtUtc);
     }
 
     [Fact]
@@ -157,8 +157,8 @@ public sealed class StudentProfileTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
-        result.Error.Message.Should().Contain("School name cannot exceed 200 characters");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
@@ -173,8 +173,8 @@ public sealed class StudentProfileTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
-        result.Error.Message.Should().Contain("Governorate cannot exceed 100 characters");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
@@ -212,6 +212,6 @@ public sealed class StudentProfileTests
         profile.StudyLevelTrackId.Should().Be(newTrackId);
         profile.SchoolName.Should().Be(newSchoolName);
         profile.Governorate.Should().Be(newGovernorate);
-        profile.UpdatedAtUtc.Should().NotBeNull();
+        profile.UpdatedAtUtc.Should().BeOnOrAfter(profile.CreatedAtUtc);
     }
 }

@@ -33,32 +33,6 @@ public sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
         builder.HasIndex(t => t.DisplayOrder)
             .HasDatabaseName("IX_Track_DisplayOrder");
 
-        // Seed data for Egyptian tracks
-        builder.HasData(
-            new
-            {
-                Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
-                NameAr = "علمي علوم",
-                NameEn = "Scientific - Sciences",
-                DisplayOrder = 1,
-                IsActive = true
-            },
-            new
-            {
-                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                NameAr = "علمي رياضة",
-                NameEn = "Scientific - Mathematics",
-                DisplayOrder = 2,
-                IsActive = true
-            },
-            new
-            {
-                Id = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                NameAr = "أدبي",
-                NameEn = "Literary",
-                DisplayOrder = 3,
-                IsActive = true
-            }
-        );
+        // Note: Seed data moved to DbInitializer.cs for runtime seeding
     }
 }

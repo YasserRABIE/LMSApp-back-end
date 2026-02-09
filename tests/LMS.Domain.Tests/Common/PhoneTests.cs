@@ -37,7 +37,8 @@ public sealed class PhoneTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("USER.INVALID_PHONE");
+        result.Error.Code.Should().Be(ErrorCodes.User.InvalidPhone);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Theory]
@@ -63,7 +64,8 @@ public sealed class PhoneTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("USER.INVALID_PHONE");
+        result.Error.Code.Should().Be(ErrorCodes.User.InvalidPhone);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]

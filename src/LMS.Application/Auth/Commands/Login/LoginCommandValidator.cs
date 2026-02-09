@@ -1,4 +1,6 @@
 using FluentValidation;
+using LMS.Application.Common;
+using LMS.Domain.Common;
 
 namespace LMS.Application.Auth.Commands.Login;
 
@@ -11,22 +13,22 @@ public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
     {
         RuleFor(x => x.Phone)
             .NotEmpty()
-            .WithMessage("Phone number is required")
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PhoneRequired))
             .Matches(@"^01[0-9]{9}$")
-            .WithMessage("Phone number must be in Egyptian format (01XXXXXXXXX)");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PhoneInvalidFormat));
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .WithMessage("Password is required");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PasswordRequired));
 
         RuleFor(x => x.DeviceFingerprint)
             .NotEmpty()
-            .WithMessage("Device fingerprint is required");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.DeviceFingerprintRequired));
 
         RuleFor(x => x.Platform)
             .NotEmpty()
-            .WithMessage("Platform is required")
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PlatformRequired))
             .MaximumLength(50)
-            .WithMessage("Platform cannot exceed 50 characters");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PlatformMaxLength));
     }
 }

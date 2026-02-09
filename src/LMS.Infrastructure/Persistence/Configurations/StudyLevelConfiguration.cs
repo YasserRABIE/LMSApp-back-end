@@ -33,32 +33,6 @@ public sealed class StudyLevelConfiguration : IEntityTypeConfiguration<StudyLeve
         builder.HasIndex(sl => sl.DisplayOrder)
             .HasDatabaseName("IX_StudyLevel_DisplayOrder");
 
-        // Seed data for Egyptian secondary education
-        builder.HasData(
-            new
-            {
-                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                NameAr = "الصف الأول الثانوي",
-                NameEn = "First Year Secondary",
-                DisplayOrder = 1,
-                IsActive = true
-            },
-            new
-            {
-                Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                NameAr = "الصف الثاني الثانوي",
-                NameEn = "Second Year Secondary",
-                DisplayOrder = 2,
-                IsActive = true
-            },
-            new
-            {
-                Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
-                NameAr = "الصف الثالث الثانوي",
-                NameEn = "Third Year Secondary (Tawjihi)",
-                DisplayOrder = 3,
-                IsActive = true
-            }
-        );
+        // Note: Seed data moved to DbInitializer.cs for runtime seeding
     }
 }

@@ -33,8 +33,8 @@ public sealed class MoneyTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
-        result.Error.Message.Should().Contain("Amount cannot be negative");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]

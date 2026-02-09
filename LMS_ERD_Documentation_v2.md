@@ -1752,39 +1752,7 @@ ALTER TABLE PointsPackage ADD CONSTRAINT CK_PointsPackage_Price
   CHECK (PriceEgp > 0);
 ```
 
-### 10.4 Cart
-
-| Column | Type | Constraints |
-|--------|------|-------------|
-| Id | UUID | PK |
-| StudentId | UUID | FK → StudentProfile, NOT NULL, UNIQUE, ON DELETE CASCADE |
-| ItemCount | SMALLINT | NOT NULL DEFAULT 0 |
-| SubTotalEgp | DECIMAL(10,2) | NOT NULL DEFAULT 0 |
-| LastActivityAtUtc | TIMESTAMPTZ | NOT NULL |
-| LastReminderSentAtUtc | TIMESTAMPTZ | NULL |
-| CreatedAtUtc | TIMESTAMPTZ | NOT NULL |
-| UpdatedAtUtc | TIMESTAMPTZ | NOT NULL |
-
-### 10.5 CartItem
-
-| Column | Type | Constraints |
-|--------|------|-------------|
-| Id | UUID | PK |
-| CartId | UUID | FK → Cart, NOT NULL, ON DELETE CASCADE |
-| ProductId | UUID | FK → Product, NOT NULL |
-| Quantity | SMALLINT | NOT NULL DEFAULT 1 |
-| UnitPriceEgp | DECIMAL(10,2) | NOT NULL |
-| AddedAtUtc | TIMESTAMPTZ | NOT NULL |
-| UpdatedAtUtc | TIMESTAMPTZ | NOT NULL |
-
-```sql
-ALTER TABLE CartItem 
-  ADD CONSTRAINT UQ_CartItem UNIQUE (CartId, ProductId);
-ALTER TABLE CartItem ADD CONSTRAINT CK_CartItem_Quantity 
-  CHECK (Quantity >= 1);
-```
-
-### 10.6 PromoCode
+### 10.4 PromoCode
 
 | Column | Type | Constraints |
 |--------|------|-------------|
@@ -3143,8 +3111,6 @@ public enum UserActivityType : byte
 | StudentProfile | StudentGamification | 1:1 | CASCADE |
 | StudentProfile | XpTransaction | 1:N | CASCADE |
 | StudentProfile | PointsTransaction | 1:N | CASCADE |
-| StudentProfile | Cart | 1:1 | CASCADE |
-| Cart | CartItem | 1:N | CASCADE |
 | Order | OrderItem | 1:N | CASCADE |
 | StudentProfile | StudentEnrollment | 1:N | CASCADE |
 | User | Notification | 1:N | CASCADE |

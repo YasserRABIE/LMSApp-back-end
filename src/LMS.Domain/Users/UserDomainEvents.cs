@@ -9,7 +9,9 @@ public sealed record UserRegisteredEvent(
     UserId UserId,
     string Phone,
     UserType UserType,
-    string FullName
+    string FirstName,
+    string SecondName,
+    string LastName
 ) : DomainEvent;
 
 /// <summary>
@@ -33,5 +35,7 @@ public sealed record UserDeactivatedEvent(
 /// </summary>
 public sealed record UserProfileUpdatedEvent(
     UserId UserId,
-    string FullName
+    string FirstName,
+    string SecondName,
+    string LastName
 ) : DomainEvent;

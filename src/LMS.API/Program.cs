@@ -149,6 +149,12 @@ app.UseSerilogRequestLogging(options =>
 
 app.MapControllers();
 
+// Initialize database and seed reference data
+using (var scope = app.Services.CreateScope())
+{
+    await LMS.Infrastructure.Persistence.DbInitializer.InitializeAsync(scope.ServiceProvider);
+}
+
 Log.Information("LMS API started successfully");
 
 app.Run();

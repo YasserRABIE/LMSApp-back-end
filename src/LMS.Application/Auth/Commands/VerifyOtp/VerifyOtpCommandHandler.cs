@@ -6,9 +6,6 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.VerifyOtp;
 
-/// <summary>
-/// Handler for VerifyOtpCommand
-/// </summary>
 public sealed class VerifyOtpCommandHandler
     : IRequestHandler<VerifyOtpCommand, ApiResult<VerificationTokenDto>>
 {
@@ -30,18 +27,18 @@ public sealed class VerifyOtpCommandHandler
         if (!isValid)
             return ApiResult<VerificationTokenDto>.Fail(
                 ErrorCodes.User.InvalidOtp,
-                "Invalid or expired OTP code",
+                ErrorMessages.GetMessage(ErrorCodes.User.InvalidOtp),
                 HttpStatusCodes.BadRequest);
 
         // 2. Generate verification token (valid for 15 minutes)
         var verificationToken = await _otpService.GenerateVerificationTokenAsync(
             request.Phone, cancellationToken);
 
-        // 3. Return verification token
+        // 3. Return verification token with success message
         var dto = new VerificationTokenDto(
             verificationToken,
             DateTime.UtcNow.AddMinutes(15));
 
-        return ApiResult<VerificationTokenDto>.Ok(dto, HttpStatusCodes.Ok);
+        return ApiResult<VerificationTokenDto>.Ok(dto, SuccessMessages.PhoneVerified);
     }
 }

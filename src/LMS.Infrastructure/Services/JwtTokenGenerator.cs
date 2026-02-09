@@ -3,8 +3,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using LMS.Application.Common.Interfaces;
+using LMS.Application.Common.Settings;
 using LMS.Domain.Users;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace LMS.Infrastructure.Services;
@@ -14,27 +15,19 @@ namespace LMS.Infrastructure.Services;
 /// </summary>
 public sealed class JwtTokenGenerator : IJwtTokenGenerator
 {
-    private readonly IConfiguration _configuration;
-    private readonly string _secret;
-    private readonly string _issuer;
-    private readonly string _audience;
-    private readonly int _accessTokenExpiryMinutes;
-    private readonly int _refreshTokenExpiryDays;
+    private readonly JwtSettings _jwtSettings;
 
-    public JwtTokenGenerator(IConfiguration configuration)
+    public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings)
     {
-        _configuration = configuration;
-        _secret = configuration["Jwt:Secret"]
-            ?? throw new InvalidOperationException("JWT Secret not configured");
-        _issuer = configuration["Jwt:Issuer"] ?? "LMS.API";
-        _audience = configuration["Jwt:Audience"] ?? "LMS.Client";
-        _accessTokenExpiryMinutes = int.Parse(configuration["Jwt:AccessTokenExpiryMinutes"] ?? "5");
-        _refreshTokenExpiryDays = int.Parse(configuration["Jwt:RefreshTokenExpiryDays"] ?? "7");
+        _jwtSettings = jwtSettings.Value;
+
+        if (string.IsNullOrEmpty(_jwtSettings.Secret))
+            throw new InvalidOperationException("JWT Secret not configured");
     }
 
     public string GenerateAccessToken(UserId userId, UserType userType, string phone)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -48,10 +41,10 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         };
 
         var token = new JwtSecurityToken(
-            issuer: _issuer,
-            audience: _audience,
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_accessTokenExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiryMinutes),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -67,7 +60,7 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
 
     public DateTime GetRefreshTokenExpiration()
     {
-        return DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
+        return DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays);
     }
 
     public UserId? ValidateToken(string token)
@@ -75,16 +68,16 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_secret);
+            var key = Encoding.UTF8.GetBytes(_jwtSettings.Secret);
 
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = true,
-                ValidIssuer = _issuer,
+                ValidIssuer = _jwtSettings.Issuer,
                 ValidateAudience = true,
-                ValidAudience = _audience,
+                ValidAudience = _jwtSettings.Audience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             };

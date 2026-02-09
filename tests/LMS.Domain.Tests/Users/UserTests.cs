@@ -8,7 +8,9 @@ public sealed class UserTests
 {
     private readonly Phone _validPhone;
     private const string ValidPasswordHash = "hashed_password_here";
-    private const string ValidFullName = "Ahmed Mohamed";
+    private const string ValidFirstName = "Ahmed";
+    private const string ValidSecondName = "Mohamed";
+    private const string ValidLastName = "Hassan";
 
     public UserTests()
     {
@@ -22,7 +24,9 @@ public sealed class UserTests
         var result = User.Create(
             _validPhone,
             ValidPasswordHash,
-            ValidFullName,
+            ValidFirstName,
+            ValidSecondName,
+            ValidLastName,
             UserType.Student,
             isPhoneVerified: false);
 
@@ -31,7 +35,9 @@ public sealed class UserTests
         var user = result.Value;
         user.Phone.Should().Be(_validPhone);
         user.PasswordHash.Should().Be(ValidPasswordHash);
-        user.FullName.Should().Be(ValidFullName);
+        user.FirstName.Should().Be(ValidFirstName);
+        user.SecondName.Should().Be(ValidSecondName);
+        user.LastName.Should().Be(ValidLastName);
         user.UserType.Should().Be(UserType.Student);
         user.IsPhoneVerified.Should().BeFalse();
         user.IsActive.Should().BeTrue();
@@ -45,51 +51,57 @@ public sealed class UserTests
         var result = User.Create(
             _validPhone,
             string.Empty,
-            ValidFullName,
+            ValidFirstName,
+            ValidSecondName,
+            ValidLastName,
             UserType.Student);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.REQUIRED");
-        result.Error.Message.Should().Contain("Password hash is required");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.Required);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void Create_WithInvalidFullName_ShouldFail(string fullName)
+    public void Create_WithInvalidFirstName_ShouldFail(string firstName)
     {
         // Act
         var result = User.Create(
             _validPhone,
             ValidPasswordHash,
-            fullName,
+            firstName,
+            ValidSecondName,
+            ValidLastName,
             UserType.Student);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.REQUIRED");
-        result.Error.Message.Should().Contain("Full name is required");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.Required);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
-    public void Create_WithTooLongFullName_ShouldFail()
+    public void Create_WithTooLongFirstName_ShouldFail()
     {
         // Arrange
-        var longName = new string('A', 201);
+        var longName = new string('A', 101);
 
         // Act
         var result = User.Create(
             _validPhone,
             ValidPasswordHash,
             longName,
+            ValidSecondName,
+            ValidLastName,
             UserType.Student);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
-        result.Error.Message.Should().Contain("Full name cannot exceed 200 characters");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
@@ -103,7 +115,9 @@ public sealed class UserTests
         var parent = result.Value;
         parent.Phone.Should().Be(_validPhone);
         parent.PasswordHash.Should().Be(ValidPasswordHash);
-        parent.FullName.Should().Be("Parent");
+        parent.FirstName.Should().Be("Parent");
+        parent.SecondName.Should().Be("");
+        parent.LastName.Should().Be("");
         parent.UserType.Should().Be(UserType.Parent);
         parent.IsPhoneVerified.Should().BeTrue();
         parent.IsActive.Should().BeTrue();
@@ -113,7 +127,7 @@ public sealed class UserTests
     public void VerifyPhone_WhenNotVerified_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
 
         // Act
         var result = user.VerifyPhone();
@@ -121,28 +135,29 @@ public sealed class UserTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.IsPhoneVerified.Should().BeTrue();
-        user.UpdatedAtUtc.Should().NotBeNull();
+        user.UpdatedAtUtc.Should().BeOnOrAfter(user.CreatedAtUtc);
     }
 
     [Fact]
     public void VerifyPhone_WhenAlreadyVerified_ShouldFail()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student, isPhoneVerified: true).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student, isPhoneVerified: true).Value;
 
         // Act
         var result = user.VerifyPhone();
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("USER.ALREADY_VERIFIED");
+        result.Error.Code.Should().Be(ErrorCodes.User.AlreadyVerified);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
     public void UpdatePassword_WithValidPasswordHash_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
         const string newPasswordHash = "new_hashed_password";
 
         // Act
@@ -151,7 +166,7 @@ public sealed class UserTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.PasswordHash.Should().Be(newPasswordHash);
-        user.UpdatedAtUtc.Should().NotBeNull();
+        user.UpdatedAtUtc.Should().BeOnOrAfter(user.CreatedAtUtc);
     }
 
     [Theory]
@@ -161,71 +176,78 @@ public sealed class UserTests
     public void UpdatePassword_WithInvalidPasswordHash_ShouldFail(string newPasswordHash)
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
 
         // Act
         var result = user.UpdatePassword(newPasswordHash);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.REQUIRED");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.Required);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
     public void UpdateProfile_WithValidData_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
-        const string newFullName = "Mohamed Ahmed";
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
+        const string newFirstName = "Mohamed";
+        const string newSecondName = "Ahmed";
+        const string newLastName = "Ali";
         const string email = "test@example.com";
 
         // Act
-        var result = user.UpdateProfile(newFullName, email);
+        var result = user.UpdateProfile(newFirstName, newSecondName, newLastName, email);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        user.FullName.Should().Be(newFullName);
+        user.FirstName.Should().Be(newFirstName);
+        user.SecondName.Should().Be(newSecondName);
+        user.LastName.Should().Be(newLastName);
         user.Email.Should().Be(email);
-        user.UpdatedAtUtc.Should().NotBeNull();
+        user.UpdatedAtUtc.Should().BeOnOrAfter(user.CreatedAtUtc);
     }
 
     [Theory]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void UpdateProfile_WithInvalidFullName_ShouldFail(string newFullName)
+    public void UpdateProfile_WithInvalidFirstName_ShouldFail(string newFirstName)
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
 
         // Act
-        var result = user.UpdateProfile(newFullName);
+        var result = user.UpdateProfile(newFirstName, ValidSecondName, ValidLastName);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.REQUIRED");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.Required);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
-    public void UpdateProfile_WithTooLongFullName_ShouldFail()
+    public void UpdateProfile_WithTooLongFirstName_ShouldFail()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
-        var longName = new string('A', 201);
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
+        var longName = new string('A', 101);
 
         // Act
-        var result = user.UpdateProfile(longName);
+        var result = user.UpdateProfile(longName, ValidSecondName, ValidLastName);
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
     public void Deactivate_WhenActive_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
         const string reason = "Account suspended";
 
         // Act
@@ -234,14 +256,14 @@ public sealed class UserTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.IsActive.Should().BeFalse();
-        user.UpdatedAtUtc.Should().NotBeNull();
+        user.UpdatedAtUtc.Should().BeOnOrAfter(user.CreatedAtUtc);
     }
 
     [Fact]
     public void Deactivate_WhenAlreadyInactive_ShouldFail()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
         user.Deactivate("First deactivation");
 
         // Act
@@ -249,14 +271,15 @@ public sealed class UserTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("USER.INACTIVE");
+        result.Error.Code.Should().Be(ErrorCodes.User.Inactive);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
     public void Reactivate_WhenInactive_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
         user.Deactivate("Test");
 
         // Act
@@ -265,28 +288,29 @@ public sealed class UserTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         user.IsActive.Should().BeTrue();
-        user.UpdatedAtUtc.Should().NotBeNull();
+        user.UpdatedAtUtc.Should().BeOnOrAfter(user.CreatedAtUtc);
     }
 
     [Fact]
     public void Reactivate_WhenAlreadyActive_ShouldFail()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student).Value;
 
         // Act
         var result = user.Reactivate();
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("VALIDATION.INVALID_INPUT");
+        result.Error.Code.Should().Be(ErrorCodes.Validation.InvalidInput);
+        result.Error.Type.Should().Be(ErrorType.Validation);
     }
 
     [Fact]
     public void CanLogin_WhenActiveAndVerified_ShouldSucceed()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student, isPhoneVerified: true).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student, isPhoneVerified: true).Value;
 
         // Act
         var result = user.CanLogin();
@@ -299,7 +323,7 @@ public sealed class UserTests
     public void CanLogin_WhenInactive_ShouldFail()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student, isPhoneVerified: true).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student, isPhoneVerified: true).Value;
         user.Deactivate("Test");
 
         // Act
@@ -307,20 +331,22 @@ public sealed class UserTests
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("USER.INACTIVE");
+        result.Error.Code.Should().Be(ErrorCodes.User.Inactive);
+        result.Error.Type.Should().Be(ErrorType.Forbidden);
     }
 
     [Fact]
     public void CanLogin_WhenNotVerified_ShouldFail()
     {
         // Arrange
-        var user = User.Create(_validPhone, ValidPasswordHash, ValidFullName, UserType.Student, isPhoneVerified: false).Value;
+        var user = User.Create(_validPhone, ValidPasswordHash, ValidFirstName, ValidSecondName, ValidLastName, UserType.Student, isPhoneVerified: false).Value;
 
         // Act
         var result = user.CanLogin();
 
         // Assert
         result.IsFailure.Should().BeTrue();
-        result.Error.Code.Should().Be("USER.NOT_VERIFIED");
+        result.Error.Code.Should().Be(ErrorCodes.User.NotVerified);
+        result.Error.Type.Should().Be(ErrorType.Forbidden);
     }
 }

@@ -43,12 +43,6 @@ public class Result
     public static Result Failure(Error error) => new(false, error);
 
     /// <summary>
-    /// Creates a failure result with code and message
-    /// </summary>
-    public static Result Failure(string code, string message, ErrorType type = ErrorType.Failure)
-        => new(false, Error.Create(code, message, type));
-
-    /// <summary>
     /// Implicit conversion from Result to bool
     /// </summary>
     public static implicit operator bool(Result result) => result.IsSuccess;
@@ -84,12 +78,6 @@ public class Result<TValue> : Result
     /// Creates a failure result
     /// </summary>
     public new static Result<TValue> Failure(Error error) => new(default, false, error);
-
-    /// <summary>
-    /// Creates a failure result with code and message
-    /// </summary>
-    public new static Result<TValue> Failure(string code, string message, ErrorType type = ErrorType.Failure)
-        => new(default, false, Error.Create(code, message, type));
 
     /// <summary>
     /// Implicit conversion from value to Result<TValue>

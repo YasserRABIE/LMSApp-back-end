@@ -7,9 +7,6 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.Login;
 
-/// <summary>
-/// Handler for LoginCommand
-/// </summary>
 public sealed class LoginCommandHandler
     : IRequestHandler<LoginCommand, ApiResult<LoginResponseDto>>
 {
@@ -42,7 +39,7 @@ public sealed class LoginCommandHandler
         if (phoneResult.IsFailure)
             return ApiResult<LoginResponseDto>.Fail(
                 phoneResult.Error.Code,
-                phoneResult.Error.Message,
+                ErrorMessages.GetMessage(phoneResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
         // 2. Get user by phone
@@ -52,7 +49,7 @@ public sealed class LoginCommandHandler
         if (user is null)
             return ApiResult<LoginResponseDto>.Fail(
                 ErrorCodes.Auth.InvalidCredentials,
-                "Invalid phone or password",
+                ErrorMessages.GetMessage(ErrorCodes.Auth.InvalidCredentials),
                 HttpStatusCodes.Unauthorized);
 
         // 3. Check if user can login (active and verified)
@@ -60,7 +57,7 @@ public sealed class LoginCommandHandler
         if (canLoginResult.IsFailure)
             return ApiResult<LoginResponseDto>.Fail(
                 canLoginResult.Error.Code,
-                canLoginResult.Error.Message,
+                ErrorMessages.GetMessage(canLoginResult.Error.Code),
                 HttpStatusCodes.Forbidden);
 
         // 4. Verify password
@@ -70,7 +67,7 @@ public sealed class LoginCommandHandler
         if (!isPasswordValid)
             return ApiResult<LoginResponseDto>.Fail(
                 ErrorCodes.Auth.InvalidCredentials,
-                "Invalid phone or password",
+                ErrorMessages.GetMessage(ErrorCodes.Auth.InvalidCredentials),
                 HttpStatusCodes.Unauthorized);
 
         // 5. Create or update device session
@@ -92,7 +89,7 @@ public sealed class LoginCommandHandler
             if (refreshResult.IsFailure)
                 return ApiResult<LoginResponseDto>.Fail(
                     refreshResult.Error.Code,
-                    refreshResult.Error.Message,
+                    ErrorMessages.GetMessage(refreshResult.Error.Code),
                     HttpStatusCodes.BadRequest);
 
             _userRepository.UpdateSession(existingSession);
@@ -111,11 +108,18 @@ public sealed class LoginCommandHandler
             if (sessionResult.IsFailure)
                 return ApiResult<LoginResponseDto>.Fail(
                     sessionResult.Error.Code,
-                    sessionResult.Error.Message,
+                    ErrorMessages.GetMessage(sessionResult.Error.Code),
                     HttpStatusCodes.BadRequest);
 
             session = sessionResult.Value;
             await _userRepository.AddSessionAsync(session, cancellationToken);
+        }
+
+        // Enforce single active device: revoke all other sessions
+        foreach (var otherSession in existingSessions.Where(s => s.Id != session.Id))
+        {
+            otherSession.Revoke();
+            _userRepository.UpdateSession(otherSession);
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -132,14 +136,14 @@ public sealed class LoginCommandHandler
         // 7. Create response with user info
         var userInfo = new UserInfoDto(
             user.Id.Value,
-            user.FullName,
+            user.GetFullName(),
             user.Phone.Value,
             user.UserType.ToString(),
             IsFirstLogin: false);
 
         var response = new LoginResponseDto(tokens, userInfo);
 
-        return ApiResult<LoginResponseDto>.Ok(response, HttpStatusCodes.Ok);
+        return ApiResult<LoginResponseDto>.Ok(response, SuccessMessages.LoginSuccess);
     }
 
     private static string HashFingerprint(string fingerprint)

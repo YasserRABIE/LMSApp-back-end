@@ -1,4 +1,6 @@
 using FluentValidation;
+using LMS.Application.Common;
+using LMS.Domain.Common;
 
 namespace LMS.Application.Auth.Commands.Logout;
 
@@ -11,6 +13,6 @@ public sealed class LogoutCommandValidator : AbstractValidator<LogoutCommand>
     {
         RuleFor(x => x.SessionId)
             .NotEmpty()
-            .WithMessage("Session ID is required");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.SessionIdRequired));
     }
 }

@@ -23,16 +23,6 @@ public sealed class ParentProfile : Entity<Guid>
     /// </summary>
     public bool IsFirstLogin { get; private set; }
 
-    /// <summary>
-    /// When the profile was created
-    /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
-
-    /// <summary>
-    /// When the profile was last updated
-    /// </summary>
-    public DateTime? UpdatedAtUtc { get; private set; }
-
     // Navigation properties
     // public User User { get; private set; } = null!;
     // public ICollection<ParentStudentLink> LinkedStudents { get; private set; } = new List<ParentStudentLink>();
@@ -82,9 +72,7 @@ public sealed class ParentProfile : Entity<Guid>
         if (!IsFirstLogin)
         {
             return Result.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "First login has already been completed",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 

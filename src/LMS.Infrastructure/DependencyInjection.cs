@@ -1,11 +1,14 @@
 using LMS.Application.Common.Interfaces;
+using LMS.Application.Common.Settings;
 using LMS.Infrastructure.Caching;
+using LMS.Infrastructure.ExternalServices.SmsMisr;
 using LMS.Infrastructure.Persistence;
 using LMS.Infrastructure.Persistence.Repositories;
 using LMS.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace LMS.Infrastructure;
 
@@ -40,6 +43,19 @@ public static class DependencyInjection
             }
         });
 
+        // Configuration Settings
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+        services.Configure<LmsSettings>(configuration.GetSection("LmsSettings"));
+        services.Configure<AuthenticationSettings>(configuration.GetSection("LmsSettings:Authentication"));
+        services.Configure<AssessmentSettings>(configuration.GetSection("LmsSettings:Assessment"));
+        services.Configure<GamificationSettings>(configuration.GetSection("LmsSettings:Gamification"));
+        services.Configure<StudyPlanSettings>(configuration.GetSection("LmsSettings:StudyPlan"));
+        services.Configure<FollowUpSettings>(configuration.GetSection("LmsSettings:FollowUp"));
+        services.Configure<PurchasingSettings>(configuration.GetSection("LmsSettings:Purchasing"));
+        services.Configure<NotificationSettings>(configuration.GetSection("LmsSettings:Notifications"));
+        services.Configure<CacheSettings>(configuration.GetSection("LmsSettings:Cache"));
+        services.Configure<SmsProviderSettings>(configuration.GetSection("SmsProvider"));
+
         // Redis
         var redisConnectionString = configuration.GetConnectionString("Redis")
             ?? throw new InvalidOperationException("Connection string 'Redis' not found");
@@ -61,6 +77,10 @@ public static class DependencyInjection
         services.AddScoped<IOtpService, OtpService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        // External Services
+        services.AddSingleton<HttpClient>();
+        services.AddSingleton<SmsMisrOtpService>();
 
         return services;
     }

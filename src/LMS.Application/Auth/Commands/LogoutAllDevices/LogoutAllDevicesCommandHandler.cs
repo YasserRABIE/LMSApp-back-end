@@ -6,9 +6,6 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.LogoutAllDevices;
 
-/// <summary>
-/// Handler for LogoutAllDevicesCommand
-/// </summary>
 public sealed class LogoutAllDevicesCommandHandler : IRequestHandler<LogoutAllDevicesCommand, ApiResult>
 {
     private readonly IUserRepository _userRepository;
@@ -33,13 +30,13 @@ public sealed class LogoutAllDevicesCommandHandler : IRequestHandler<LogoutAllDe
         if (user is null)
             return ApiResult.Fail(
                 ErrorCodes.User.NotFound,
-                "User not found",
+                ErrorMessages.GetMessage(ErrorCodes.User.NotFound),
                 HttpStatusCodes.NotFound);
 
         // 2. Revoke all sessions
         await _userRepository.RevokeAllSessionsAsync(userId, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return ApiResult.Ok("All devices logged out successfully", HttpStatusCodes.Ok);
+        return ApiResult.Ok(SuccessMessages.LogoutAllDevicesSuccess);
     }
 }

@@ -3,8 +3,6 @@ using LMS.Application.Auth.Commands.Logout;
 using LMS.Application.Auth.Commands.LogoutAllDevices;
 using LMS.Application.Auth.Commands.RefreshToken;
 using LMS.Application.Auth.Commands.RegisterStudent;
-using LMS.Application.Auth.Commands.SendOtp;
-using LMS.Application.Auth.Commands.VerifyOtp;
 using LMS.Application.Auth.DTOs;
 using LMS.Application.Common;
 using MediatR;
@@ -28,39 +26,7 @@ public class AuthController : ControllerBase
         _mediator = mediator;
     }
 
-    /// <summary>
-    /// Send OTP to phone number for verification
-    /// </summary>
-    /// <param name="request">Phone number</param>
-    /// <returns>Success message if OTP sent</returns>
-    [HttpPost("otp/send")]
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(ApiResult), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResult), StatusCodes.Status409Conflict)]
-    [ProducesResponseType(typeof(ApiResult), StatusCodes.Status429TooManyRequests)]
-    public async Task<IActionResult> SendOtp([FromBody] SendOtpRequest request)
-    {
-        var command = new SendOtpCommand(request.Phone);
-        var result = await _mediator.Send(command);
-        return StatusCode(result.StatusCode, result);
-    }
-
-    /// <summary>
-    /// Verify OTP code and get verification token
-    /// </summary>
-    /// <param name="request">Phone number and OTP code</param>
-    /// <returns>Verification token for registration</returns>
-    [HttpPost("otp/verify")]
-    [AllowAnonymous]
-    [ProducesResponseType(typeof(ApiResult<VerificationTokenDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpRequest request)
-    {
-        var command = new VerifyOtpCommand(request.Phone, request.Code);
-        var result = await _mediator.Send(command);
-        return StatusCode(result.StatusCode, result);
-    }
+    // OTP endpoints removed - phone verification disabled for development
 
     /// <summary>
     /// Register a new student account
@@ -75,8 +41,10 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentRequest request)
     {
         var command = new RegisterStudentCommand(
-            request.VerificationToken,
-            request.FullName,
+            request.Phone,
+            request.FirstName,
+            request.SecondName,
+            request.LastName,
             request.Password,
             request.StudyLevelTrackId,
             request.SchoolName,
@@ -171,11 +139,11 @@ public class AuthController : ControllerBase
 }
 
 // Request DTOs
-public record SendOtpRequest(string Phone);
-public record VerifyOtpRequest(string Phone, string Code);
 public record RegisterStudentRequest(
-    string VerificationToken,
-    string FullName,
+    string Phone,
+    string FirstName,
+    string SecondName,
+    string LastName,
     string Password,
     Guid StudyLevelTrackId,
     string? SchoolName = null,

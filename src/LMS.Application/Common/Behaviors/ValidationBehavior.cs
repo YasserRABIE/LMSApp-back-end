@@ -1,4 +1,5 @@
 using FluentValidation;
+using LMS.Domain.Common;
 using MediatR;
 
 namespace LMS.Application.Common.Behaviors;
@@ -61,25 +62,28 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
                 var valueType = responseType.GetGenericArguments()[0];
                 var failureMethod = typeof(ApiResult<>)
                     .MakeGenericType(valueType)
-                    .GetMethod(nameof(ApiResult.FailureResult), new[] { typeof(string), typeof(string), typeof(Domain.Common.ErrorType) });
+                    .GetMethod(nameof(ApiResult.Fail), new[] { typeof(string), typeof(string), typeof(int), typeof(Dictionary<string, string[]>) });
 
                 if (failureMethod != null)
                 {
-                    var errorMessage = "One or more validation errors occurred";
+                    var errorMessage = ErrorMessages.GetMessage(ErrorCodes.Validation.InvalidInput);
                     return (TResponse)failureMethod.Invoke(null, new object[] {
-                        Domain.Common.ErrorCodes.Validation.InvalidInput,
+                        ErrorCodes.Validation.InvalidInput,
                         errorMessage,
-                        Domain.Common.ErrorType.Validation
+                        HttpStatusCodes.BadRequest,
+                        validationErrors
                     })!;
                 }
             }
             // Handle non-generic ApiResult
             else if (responseType == typeof(ApiResult))
             {
-                return (TResponse)ApiResult.FailureResult(
-                    Domain.Common.ErrorCodes.Validation.InvalidInput,
-                    "One or more validation errors occurred",
-                    Domain.Common.ErrorType.Validation
+                var errorMessage = ErrorMessages.GetMessage(ErrorCodes.Validation.InvalidInput);
+                return (TResponse)ApiResult.Fail(
+                    ErrorCodes.Validation.InvalidInput,
+                    errorMessage,
+                    HttpStatusCodes.BadRequest,
+                    validationErrors
                 );
             }
         }

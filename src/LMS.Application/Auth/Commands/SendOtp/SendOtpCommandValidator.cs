@@ -1,4 +1,6 @@
 using FluentValidation;
+using LMS.Application.Common;
+using LMS.Domain.Common;
 
 namespace LMS.Application.Auth.Commands.SendOtp;
 
@@ -11,8 +13,8 @@ public sealed class SendOtpCommandValidator : AbstractValidator<SendOtpCommand>
     {
         RuleFor(x => x.Phone)
             .NotEmpty()
-            .WithMessage("Phone number is required")
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PhoneRequired))
             .Matches(@"^01[0-9]{9}$")
-            .WithMessage("Phone number must be in Egyptian format (01XXXXXXXXX)");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.PhoneInvalidFormat));
     }
 }

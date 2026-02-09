@@ -1,4 +1,6 @@
 using FluentValidation;
+using LMS.Application.Common;
+using LMS.Domain.Common;
 
 namespace LMS.Application.Auth.Commands.LogoutAllDevices;
 
@@ -11,6 +13,6 @@ public sealed class LogoutAllDevicesCommandValidator : AbstractValidator<LogoutA
     {
         RuleFor(x => x.UserId)
             .NotEmpty()
-            .WithMessage("User ID is required");
+            .WithMessage(ErrorMessages.GetMessage(ErrorCodes.Validation.UserIdRequired));
     }
 }

@@ -7,24 +7,18 @@ using MediatR;
 
 namespace LMS.Application.Auth.Commands.RegisterStudent;
 
-/// <summary>
-/// Handler for RegisterStudentCommand
-/// </summary>
 public sealed class RegisterStudentCommandHandler
     : IRequestHandler<RegisterStudentCommand, ApiResult<UserInfoDto>>
 {
-    private readonly IOtpService _otpService;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IUserRepository _userRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public RegisterStudentCommandHandler(
-        IOtpService otpService,
         IPasswordHasher passwordHasher,
         IUserRepository userRepository,
         IUnitOfWork unitOfWork)
     {
-        _otpService = otpService;
         _passwordHasher = passwordHasher;
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
@@ -34,54 +28,46 @@ public sealed class RegisterStudentCommandHandler
         RegisterStudentCommand request,
         CancellationToken cancellationToken)
     {
-        // 1. Validate verification token and get phone
-        var phoneNumber = await _otpService.ValidateVerificationTokenAsync(
-            request.VerificationToken, cancellationToken);
-
-        if (phoneNumber is null)
-            return ApiResult<UserInfoDto>.Fail(
-                ErrorCodes.Auth.InvalidVerificationToken,
-                "Invalid or expired verification token",
-                HttpStatusCodes.BadRequest);
-
-        // 2. Validate phone format
-        var phoneResult = Phone.Create(phoneNumber);
+        // 1. Validate phone format (phone verification removed)
+        var phoneResult = Phone.Create(request.Phone);
         if (phoneResult.IsFailure)
             return ApiResult<UserInfoDto>.Fail(
                 phoneResult.Error.Code,
-                phoneResult.Error.Message,
+                ErrorMessages.GetMessage(phoneResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
-        // 3. Check if phone already registered
+        // 2. Check if phone already registered
         var existingUser = await _userRepository.GetByPhoneAsync(
             phoneResult.Value, cancellationToken);
 
         if (existingUser is not null)
             return ApiResult<UserInfoDto>.Fail(
                 ErrorCodes.User.PhoneAlreadyExists,
-                "Phone number already registered",
+                ErrorMessages.GetMessage(ErrorCodes.User.PhoneAlreadyExists),
                 HttpStatusCodes.Conflict);
 
-        // 4. Hash password
+        // 3. Hash password
         var passwordHash = _passwordHasher.HashPassword(request.Password);
 
-        // 5. Create user entity
+        // 4. Create user entity (phone verified in development since OTP is bypassed)
         var userResult = User.Create(
             phoneResult.Value,
             passwordHash,
-            request.FullName,
+            request.FirstName,
+            request.SecondName,
+            request.LastName,
             UserType.Student,
             isPhoneVerified: true);
 
         if (userResult.IsFailure)
             return ApiResult<UserInfoDto>.Fail(
                 userResult.Error.Code,
-                userResult.Error.Message,
+                ErrorMessages.GetMessage(userResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
         var user = userResult.Value;
 
-        // 6. Create student profile
+        // 5. Create student profile
         var profileResult = StudentProfile.Create(
             user.Id,
             request.StudyLevelTrackId,
@@ -91,22 +77,22 @@ public sealed class RegisterStudentCommandHandler
         if (profileResult.IsFailure)
             return ApiResult<UserInfoDto>.Fail(
                 profileResult.Error.Code,
-                profileResult.Error.Message,
+                ErrorMessages.GetMessage(profileResult.Error.Code),
                 HttpStatusCodes.BadRequest);
 
-        // 7. Save user and profile
+        // 6. Save user and profile
         await _userRepository.AddAsync(user, cancellationToken);
         await _userRepository.AddStudentProfileAsync(profileResult.Value, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // 8. Map to DTO and return
+        // 7. Map to DTO and return with success message
         var dto = new UserInfoDto(
             user.Id.Value,
-            user.FullName,
+            user.GetFullName(),
             user.Phone.Value,
             user.UserType.ToString(),
             IsFirstLogin: false);
 
-        return ApiResult<UserInfoDto>.Ok(dto, HttpStatusCodes.Created);
+        return ApiResult<UserInfoDto>.Ok(dto, SuccessMessages.RegistrationSuccess, HttpStatusCodes.Created);
     }
 }

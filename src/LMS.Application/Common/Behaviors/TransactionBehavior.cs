@@ -7,6 +7,7 @@ namespace LMS.Application.Common.Behaviors;
 /// <summary>
 /// MediatR pipeline behavior that wraps command execution in a database transaction
 /// Only applies to commands that return ApiResult (not queries)
+/// Compatible with Entity Framework retry execution strategies
 /// </summary>
 public sealed class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
@@ -37,28 +38,24 @@ public sealed class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior
             return await next();
         }
 
-        _logger.LogInformation("Starting transaction for {RequestName}", requestName);
+        // For commands, execute without explicit transaction
+        // Entity Framework will automatically wrap SaveChanges in a transaction
+        // This makes it compatible with retry execution strategies
+        _logger.LogInformation("Executing command {RequestName}", requestName);
 
         try
         {
-            // Begin transaction
-            await _unitOfWork.BeginTransactionAsync(cancellationToken);
-
-            // Execute the request
+            // Execute the request (SaveChanges will be called by repositories)
             var response = await next();
 
-            // If successful, commit transaction
             if (response.Success)
             {
-                await _unitOfWork.CommitTransactionAsync(cancellationToken);
-                _logger.LogInformation("Transaction committed for {RequestName}", requestName);
+                _logger.LogInformation("Command {RequestName} executed successfully", requestName);
             }
             else
             {
-                // If failed, rollback transaction
-                await _unitOfWork.RollbackTransactionAsync(cancellationToken);
                 _logger.LogWarning(
-                    "Transaction rolled back for {RequestName}. Error: {ErrorCode}",
+                    "Command {RequestName} failed. Error: {ErrorCode}",
                     requestName,
                     response.Error?.Code ?? "UNKNOWN"
                 );
@@ -68,12 +65,9 @@ public sealed class TransactionBehavior<TRequest, TResponse> : IPipelineBehavior
         }
         catch (Exception ex)
         {
-            // Rollback on exception
-            await _unitOfWork.RollbackTransactionAsync(cancellationToken);
-
             _logger.LogError(
                 ex,
-                "Transaction rolled back for {RequestName} due to exception",
+                "Command {RequestName} threw exception",
                 requestName
             );
 

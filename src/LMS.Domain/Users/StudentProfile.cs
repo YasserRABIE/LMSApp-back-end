@@ -27,16 +27,6 @@ public sealed class StudentProfile : Entity<Guid>
     /// </summary>
     public string? Governorate { get; private set; }
 
-    /// <summary>
-    /// When the profile was created
-    /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
-
-    /// <summary>
-    /// When the profile was last updated
-    /// </summary>
-    public DateTime? UpdatedAtUtc { get; private set; }
-
     // Navigation properties
     // public User User { get; private set; } = null!;
     // public StudyLevelTrack StudyLevelTrack { get; private set; } = null!;
@@ -74,27 +64,21 @@ public sealed class StudentProfile : Entity<Guid>
         if (studyLevelTrackId == Guid.Empty)
         {
             return Result<StudentProfile>.Failure(
-                ErrorCodes.Validation.Required,
-                "Study level and track must be selected",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (!string.IsNullOrWhiteSpace(schoolName) && schoolName.Length > 200)
         {
             return Result<StudentProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "School name cannot exceed 200 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
         if (!string.IsNullOrWhiteSpace(governorate) && governorate.Length > 100)
         {
             return Result<StudentProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Governorate cannot exceed 100 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -127,9 +111,7 @@ public sealed class StudentProfile : Entity<Guid>
             if (schoolName.Length > 200)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "School name cannot exceed 200 characters",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
             SchoolName = schoolName;
@@ -140,9 +122,7 @@ public sealed class StudentProfile : Entity<Guid>
             if (governorate.Length > 100)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "Governorate cannot exceed 100 characters",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
             Governorate = governorate;

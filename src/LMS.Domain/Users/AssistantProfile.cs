@@ -37,16 +37,6 @@ public sealed class AssistantProfile : Entity<Guid>
     /// </summary>
     public int TotalRatings { get; private set; }
 
-    /// <summary>
-    /// When the profile was created
-    /// </summary>
-    public DateTime CreatedAtUtc { get; private set; }
-
-    /// <summary>
-    /// When the profile was last updated
-    /// </summary>
-    public DateTime? UpdatedAtUtc { get; private set; }
-
     // Navigation properties
     // public User User { get; private set; } = null!;
 
@@ -83,18 +73,14 @@ public sealed class AssistantProfile : Entity<Guid>
         if (maxStudents <= 0)
         {
             return Result<AssistantProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Maximum students must be greater than zero",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
         if (!string.IsNullOrWhiteSpace(bio) && bio.Length > 2000)
         {
             return Result<AssistantProfile>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Bio cannot exceed 2000 characters",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -118,9 +104,7 @@ public sealed class AssistantProfile : Entity<Guid>
             if (bio.Length > 2000)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "Bio cannot exceed 2000 characters",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
             Bio = bio;
@@ -131,18 +115,14 @@ public sealed class AssistantProfile : Entity<Guid>
             if (maxStudents.Value <= 0)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    "Maximum students must be greater than zero",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
 
             if (maxStudents.Value < CurrentStudentCount)
             {
                 return Result.Failure(
-                    ErrorCodes.Validation.InvalidInput,
-                    $"Cannot set maximum students below current student count ({CurrentStudentCount})",
-                    ErrorType.Validation
+                    Error.Validation(ErrorCodes.Validation.InvalidInput)
                 );
             }
 
@@ -167,9 +147,7 @@ public sealed class AssistantProfile : Entity<Guid>
         if (!CanAcceptMoreStudents())
         {
             return Result.Failure(
-                ErrorCodes.FollowUp.GroupFull,
-                "Assistant has reached maximum student capacity",
-                ErrorType.Conflict
+                Error.Conflict(ErrorCodes.FollowUp.GroupFull)
             );
         }
 
@@ -187,9 +165,7 @@ public sealed class AssistantProfile : Entity<Guid>
         if (CurrentStudentCount <= 0)
         {
             return Result.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Current student count is already zero",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
@@ -207,9 +183,7 @@ public sealed class AssistantProfile : Entity<Guid>
         if (rating < 1 || rating > 5)
         {
             return Result.Failure(
-                ErrorCodes.Validation.OutOfRange,
-                "Rating must be between 1 and 5",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.OutOfRange)
             );
         }
 

@@ -62,27 +62,21 @@ public sealed class StudyLevel : Entity<Guid>
         if (string.IsNullOrWhiteSpace(nameAr))
         {
             return Result<StudyLevel>.Failure(
-                ErrorCodes.Validation.Required,
-                "Arabic name is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (string.IsNullOrWhiteSpace(nameEn))
         {
             return Result<StudyLevel>.Failure(
-                ErrorCodes.Validation.Required,
-                "English name is required",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.Required)
             );
         }
 
         if (displayOrder < 0)
         {
             return Result<StudyLevel>.Failure(
-                ErrorCodes.Validation.InvalidInput,
-                "Display order cannot be negative",
-                ErrorType.Validation
+                Error.Validation(ErrorCodes.Validation.InvalidInput)
             );
         }
 
