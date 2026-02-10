@@ -32,10 +32,10 @@ public class AuthController : ControllerBase
     /// Register a new student account
     /// </summary>
     /// <param name="request">Student registration details</param>
-    /// <returns>User information</returns>
+    /// <returns>Access token, refresh token, and user information</returns>
     [HttpPost("register/student")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(ApiResult<UserInfoDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResult<LoginResponseDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResult), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResult), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterStudent([FromBody] RegisterStudentRequest request)
@@ -47,6 +47,8 @@ public class AuthController : ControllerBase
             request.LastName,
             request.Password,
             request.StudyLevelTrackId,
+            request.DeviceFingerprint,
+            request.Platform,
             request.SchoolName,
             request.Governorate);
 
@@ -146,6 +148,8 @@ public record RegisterStudentRequest(
     string LastName,
     string Password,
     Guid StudyLevelTrackId,
+    string DeviceFingerprint,
+    string Platform,
     string? SchoolName = null,
     string? Governorate = null);
 public record LoginRequest(string Phone, string Password, string DeviceFingerprint, string Platform);

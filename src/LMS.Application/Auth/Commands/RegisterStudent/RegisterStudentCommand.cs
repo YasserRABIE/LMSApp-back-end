@@ -15,6 +15,8 @@ public sealed record RegisterStudentCommand(
     string LastName,
     string Password,
     Guid StudyLevelTrackId,
+    string DeviceFingerprint,
+    string Platform,
     string? SchoolName = null,
     string? Governorate = null
-) : IRequest<ApiResult<UserInfoDto>>;
+) : IRequest<ApiResult<LoginResponseDto>>;
