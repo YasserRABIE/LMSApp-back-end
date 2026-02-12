@@ -11,7 +11,9 @@ public sealed class VideoContentConfiguration : IEntityTypeConfiguration<VideoCo
         builder.ToTable("VideoContent");
         builder.HasKey(v => v.Id);
 
-        builder.Property(v => v.ContentItemId).IsRequired();
+        builder.Property(v => v.ContentItemId)
+            .HasConversion(id => id.Value, value => ContentItemId.From(value))
+            .IsRequired();
         builder.Property(v => v.ProviderId).HasMaxLength(50).IsRequired();
         builder.Property(v => v.ExternalVideoId).HasMaxLength(500).IsRequired();
         builder.Property(v => v.DurationSeconds).IsRequired();
@@ -25,5 +27,11 @@ public sealed class VideoContentConfiguration : IEntityTypeConfiguration<VideoCo
 
         builder.HasIndex(v => v.ContentItemId).IsUnique().HasDatabaseName("UQ_VideoContent_Content");
         builder.HasIndex(v => new { v.ProviderId, v.ExternalVideoId }).HasDatabaseName("IX_VideoContent_Provider");
+
+        // Relationships - using shadow navigation (no navigation properties on entity)
+        builder.HasOne<ContentItem>()
+            .WithOne()
+            .HasForeignKey<VideoContent>(v => v.ContentItemId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

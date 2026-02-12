@@ -1,168 +1,68 @@
 using LMS.Domain.Common;
+using LMS.Domain.Purchasing;
 
 namespace LMS.Domain.Content;
 
-/// <summary>
-/// Represents a chapter/stage within a module
-/// Stages organize content items into logical sections
-/// </summary>
-public sealed class Stage : Entity<Guid>
+public sealed class Stage : Entity<StageId>
 {
-    /// <summary>
-    /// Reference to the parent module
-    /// </summary>
-    public Guid ModuleId { get; private set; }
-
-    /// <summary>
-    /// Stage title
-    /// </summary>
+    public ModuleId ModuleId { get; private set; }
     public string Title { get; private set; }
-
-    /// <summary>
-    /// Stage description
-    /// </summary>
     public string? Description { get; private set; }
-
-    /// <summary>
-    /// Display order within the module
-    /// </summary>
-    public short DisplayOrder { get; private set; }
-
-    /// <summary>
-    /// Stage visibility status
-    /// </summary>
+    public int DisplayOrder { get; private set; }
     public Visibility Visibility { get; private set; }
-
-    /// <summary>
-    /// Indicates if this stage is active
-    /// </summary>
+    public ProductId? ProductId { get; private set; }
     public bool IsActive { get; private set; }
 
-    // EF Core constructor
     private Stage() : base()
     {
+        ModuleId = null!;
         Title = string.Empty;
     }
 
-    private Stage(
-        Guid id,
-        Guid moduleId,
-        string title,
-        string? description,
-        short displayOrder)
-        : base(id)
+    private Stage(StageId id, ModuleId moduleId, string title, string? description, int displayOrder) : base(id)
     {
         ModuleId = moduleId;
         Title = title;
         Description = description;
         DisplayOrder = displayOrder;
-        Visibility = Visibility.Draft;
+        Visibility = Visibility.Hidden;
         IsActive = true;
     }
 
-    /// <summary>
-    /// Factory method to create a new stage
-    /// </summary>
-    public static Result<Stage> Create(
-        Guid moduleId,
-        string title,
-        string? description,
-        short displayOrder)
+    public static Result<Stage> Create(ModuleId moduleId, string title, string? description, int displayOrder)
     {
-        if (moduleId == Guid.Empty)
-        {
-            return Result<Stage>.Failure(
-                Error.Validation(ErrorCodes.Validation.Required)
-            );
-        }
-
         if (string.IsNullOrWhiteSpace(title))
-        {
-            return Result<Stage>.Failure(
-                Error.Validation(ErrorCodes.Validation.Required)
-            );
-        }
+            return Result<Stage>.Failure(Error.Validation(ErrorCodes.Stage.TitleRequired));
 
         if (title.Length > 300)
-        {
-            return Result<Stage>.Failure(
-                Error.Validation(ErrorCodes.Validation.InvalidInput)
-            );
-        }
+            return Result<Stage>.Failure(Error.Validation(ErrorCodes.Stage.TitleTooLong));
 
-        var stage = new Stage(
-            Guid.NewGuid(),
-            moduleId,
-            title,
-            description,
-            displayOrder
-        );
+        if (displayOrder < 0)
+            return Result<Stage>.Failure(Error.Validation(ErrorCodes.Stage.InvalidDisplayOrder));
 
+        var stage = new Stage(StageId.New(), moduleId, title.Trim(), description?.Trim(), displayOrder);
         return Result<Stage>.Success(stage);
     }
 
-    /// <summary>
-    /// Updates stage details
-    /// </summary>
-    public Result UpdateDetails(
-        string title,
-        string? description,
-        short displayOrder)
+    public Result UpdateDetails(string title, string? description)
     {
         if (string.IsNullOrWhiteSpace(title))
-        {
-            return Result.Failure(
-                Error.Validation(ErrorCodes.Validation.Required)
-            );
-        }
+            return Result.Failure(Error.Validation(ErrorCodes.Stage.TitleRequired));
 
         if (title.Length > 300)
-        {
-            return Result.Failure(
-                Error.Validation(ErrorCodes.Validation.InvalidInput)
-            );
-        }
+            return Result.Failure(Error.Validation(ErrorCodes.Stage.TitleTooLong));
 
-        Title = title;
-        Description = description;
-        DisplayOrder = displayOrder;
+        Title = title.Trim();
+        Description = description?.Trim();
 
         return Result.Success();
     }
 
-    /// <summary>
-    /// Publishes the stage (makes it visible to students)
-    /// </summary>
-    public Result Publish()
-    {
-        if (Visibility == Visibility.Published)
-        {
-            return Result.Failure(
-                Error.Conflict("STAGE.ALREADY_PUBLISHED")
-            );
-        }
-
-        Visibility = Visibility.Published;
-        return Result.Success();
-    }
-
-    /// <summary>
-    /// Unpublishes the stage
-    /// </summary>
-    public void Unpublish() => Visibility = Visibility.Draft;
-
-    /// <summary>
-    /// Hides the stage completely
-    /// </summary>
+    public void UpdateDisplayOrder(int displayOrder) => DisplayOrder = displayOrder;
+    public void Publish() => Visibility = Visibility.Published;
     public void Hide() => Visibility = Visibility.Hidden;
-
-    /// <summary>
-    /// Deactivates the stage
-    /// </summary>
     public void Deactivate() => IsActive = false;
-
-    /// <summary>
-    /// Activates the stage
-    /// </summary>
     public void Activate() => IsActive = true;
+    public void AssignProduct(ProductId productId) => ProductId = productId;
+    public void RemoveProduct() => ProductId = null;
 }

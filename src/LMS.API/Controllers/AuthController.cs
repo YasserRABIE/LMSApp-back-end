@@ -1,14 +1,14 @@
-using LMS.Application.Auth.Commands.Login;
-using LMS.Application.Auth.Commands.Logout;
-using LMS.Application.Auth.Commands.LogoutAllDevices;
-using LMS.Application.Auth.Commands.RefreshToken;
-using LMS.Application.Auth.Commands.RegisterStudent;
-using LMS.Application.Auth.DTOs;
 using LMS.Application.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using LMS.Application.Features.Auth.Commands.Login;
+using LMS.Application.Features.Auth.Commands.Logout;
+using LMS.Application.Features.Auth.Commands.LogoutAllDevices;
+using LMS.Application.Features.Auth.Commands.RefreshToken;
+using LMS.Application.Features.Auth.Commands.RegisterStudent;
+using LMS.Application.Features.Auth.DTOs;
 
 namespace LMS.API.Controllers;
 

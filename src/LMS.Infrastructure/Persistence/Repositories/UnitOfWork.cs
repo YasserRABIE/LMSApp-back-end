@@ -7,9 +7,9 @@ namespace LMS.Infrastructure.Persistence.Repositories;
 /// </summary>
 public sealed class UnitOfWork : IUnitOfWork
 {
-    private readonly ApplicationDbContext _context;
+    private readonly LmsDbContext _context;
 
-    public UnitOfWork(ApplicationDbContext context)
+    public UnitOfWork(LmsDbContext context)
     {
         _context = context;
     }

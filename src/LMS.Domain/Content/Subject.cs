@@ -2,154 +2,79 @@ using LMS.Domain.Common;
 
 namespace LMS.Domain.Content;
 
-/// <summary>
-/// Represents an academic subject (e.g., Math, Physics, Chemistry)
-/// Reference data - typically seeded in database
-/// </summary>
-public sealed class Subject : Entity<Guid>
+public sealed class Subject : Entity<SubjectId>
 {
-    /// <summary>
-    /// Subject name in Arabic
-    /// </summary>
     public string Name { get; private set; }
-
-    /// <summary>
-    /// Subject name in English
-    /// </summary>
-    public string? NameEn { get; private set; }
-
-    /// <summary>
-    /// Icon URL or identifier
-    /// </summary>
-    public string? Icon { get; private set; }
-
-    /// <summary>
-    /// Color code for UI display (hex format #RRGGBB)
-    /// </summary>
-    public string? Color { get; private set; }
-
-    /// <summary>
-    /// Indicates if this is a core subject (Math, Arabic, etc.)
-    /// </summary>
+    public string Icon { get; private set; }
+    public string Color { get; private set; }
     public bool IsCore { get; private set; }
-
-    /// <summary>
-    /// Indicates if this subject is active
-    /// </summary>
+    public int DisplayOrder { get; private set; }
     public bool IsActive { get; private set; }
 
-    /// <summary>
-    /// Display order for sorting
-    /// </summary>
-    public short DisplayOrder { get; private set; }
-
-    // EF Core constructor
     private Subject() : base()
     {
         Name = string.Empty;
+        Icon = string.Empty;
+        Color = string.Empty;
     }
 
-    private Subject(
-        Guid id,
-        string name,
-        string? nameEn,
-        short displayOrder,
-        bool isCore = false)
-        : base(id)
+    private Subject(SubjectId id, string name, string icon, string color, bool isCore, int displayOrder) : base(id)
     {
         Name = name;
-        NameEn = nameEn;
-        DisplayOrder = displayOrder;
+        Icon = icon;
+        Color = color;
         IsCore = isCore;
+        DisplayOrder = displayOrder;
         IsActive = true;
     }
 
-    /// <summary>
-    /// Factory method to create a new subject
-    /// </summary>
-    public static Result<Subject> Create(
-        string name,
-        string? nameEn,
-        short displayOrder,
-        bool isCore = false)
+    public static Result<Subject> Create(string name, string icon, string color, bool isCore, int displayOrder)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
-            return Result<Subject>.Failure(
-                Error.Validation(ErrorCodes.Validation.Required)
-            );
-        }
+            return Result<Subject>.Failure(Error.Validation(ErrorCodes.Subject.NameRequired));
+
+        if (name.Length > 100)
+            return Result<Subject>.Failure(Error.Validation(ErrorCodes.Subject.NameTooLong));
+
+        if (string.IsNullOrWhiteSpace(icon))
+            return Result<Subject>.Failure(Error.Validation(ErrorCodes.Subject.IconRequired));
+
+        if (string.IsNullOrWhiteSpace(color))
+            return Result<Subject>.Failure(Error.Validation(ErrorCodes.Subject.ColorRequired));
 
         if (displayOrder < 0)
-        {
-            return Result<Subject>.Failure(
-                Error.Validation(ErrorCodes.Validation.InvalidInput)
-            );
-        }
+            return Result<Subject>.Failure(Error.Validation(ErrorCodes.Subject.InvalidDisplayOrder));
 
-        var subject = new Subject(
-            Guid.NewGuid(),
-            name,
-            nameEn,
-            displayOrder,
-            isCore
-        );
-
+        var subject = new Subject(SubjectId.New(), name.Trim(), icon.Trim(), color.Trim(), isCore, displayOrder);
         return Result<Subject>.Success(subject);
     }
 
-    /// <summary>
-    /// Updates subject details
-    /// </summary>
-    public Result Update(
-        string name,
-        string? nameEn,
-        short displayOrder,
-        bool isCore)
+    public Result UpdateDetails(string name, string icon, string color, bool isCore, int displayOrder)
     {
         if (string.IsNullOrWhiteSpace(name))
-        {
-            return Result.Failure(
-                Error.Validation(ErrorCodes.Validation.Required)
-            );
-        }
+            return Result.Failure(Error.Validation(ErrorCodes.Subject.NameRequired));
 
-        Name = name;
-        NameEn = nameEn;
-        DisplayOrder = displayOrder;
+        if (name.Length > 100)
+            return Result.Failure(Error.Validation(ErrorCodes.Subject.NameTooLong));
+
+        if (string.IsNullOrWhiteSpace(icon))
+            return Result.Failure(Error.Validation(ErrorCodes.Subject.IconRequired));
+
+        if (string.IsNullOrWhiteSpace(color))
+            return Result.Failure(Error.Validation(ErrorCodes.Subject.ColorRequired));
+
+        if (displayOrder < 0)
+            return Result.Failure(Error.Validation(ErrorCodes.Subject.InvalidDisplayOrder));
+
+        Name = name.Trim();
+        Icon = icon.Trim();
+        Color = color.Trim();
         IsCore = isCore;
+        DisplayOrder = displayOrder;
 
         return Result.Success();
     }
 
-    /// <summary>
-    /// Sets the subject icon
-    /// </summary>
-    public void SetIcon(string? icon) => Icon = icon;
-
-    /// <summary>
-    /// Sets the subject color (hex format #RRGGBB)
-    /// </summary>
-    public Result SetColor(string? color)
-    {
-        if (color != null && !System.Text.RegularExpressions.Regex.IsMatch(color, @"^#[0-9A-Fa-f]{6}$"))
-        {
-            return Result.Failure(
-                Error.Validation(ErrorCodes.Validation.InvalidInput)
-            );
-        }
-
-        Color = color;
-        return Result.Success();
-    }
-
-    /// <summary>
-    /// Deactivates the subject
-    /// </summary>
     public void Deactivate() => IsActive = false;
-
-    /// <summary>
-    /// Activates the subject
-    /// </summary>
     public void Activate() => IsActive = true;
 }

@@ -1,0 +1,44 @@
+using LMS.Application.Common;
+using LMS.Application.Common.Interfaces;
+using LMS.Application.Features.Auth.DTOs;
+using LMS.Domain.Common;
+using MediatR;
+
+namespace LMS.Application.Features.Auth.Commands.VerifyOtp;
+
+public sealed class VerifyOtpCommandHandler
+    : IRequestHandler<VerifyOtpCommand, ApiResult<VerificationTokenDto>>
+{
+    private readonly IOtpService _otpService;
+
+    public VerifyOtpCommandHandler(IOtpService otpService)
+    {
+        _otpService = otpService;
+    }
+
+    public async Task<ApiResult<VerificationTokenDto>> Handle(
+        VerifyOtpCommand request,
+        CancellationToken cancellationToken)
+    {
+        // 1. Verify OTP
+        var isValid = await _otpService.VerifyOtpAsync(
+            request.Phone, request.Code, cancellationToken);
+
+        if (!isValid)
+            return ApiResult<VerificationTokenDto>.Fail(
+                ErrorCodes.User.InvalidOtp,
+                ErrorMessages.GetMessage(ErrorCodes.User.InvalidOtp),
+                HttpStatusCodes.BadRequest);
+
+        // 2. Generate verification token (valid for 15 minutes)
+        var verificationToken = await _otpService.GenerateVerificationTokenAsync(
+            request.Phone, cancellationToken);
+
+        // 3. Return verification token with success message
+        var dto = new VerificationTokenDto(
+            verificationToken,
+            DateTime.UtcNow.AddMinutes(15));
+
+        return ApiResult<VerificationTokenDto>.Ok(dto, SuccessMessages.PhoneVerified);
+    }
+}

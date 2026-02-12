@@ -34,6 +34,42 @@ public static class ErrorCodes
         public const string MaxDevicesReached = "AUTH.MAX_DEVICES_REACHED";
     }
 
+    // ===== TAG ERRORS =====
+    public static class Tag
+    {
+        public const string NameRequired = "TAG.NAME_REQUIRED";
+        public const string NameTooLong = "TAG.NAME_TOO_LONG";
+        public const string NotFound = "TAG.NOT_FOUND";
+        public const string AlreadyExists = "TAG.ALREADY_EXISTS";
+    }
+
+    // ===== SUBJECT ERRORS =====
+    public static class Subject
+    {
+        public const string NameRequired = "SUBJECT.NAME_REQUIRED";
+        public const string NameTooLong = "SUBJECT.NAME_TOO_LONG";
+        public const string IconRequired = "SUBJECT.ICON_REQUIRED";
+        public const string ColorRequired = "SUBJECT.COLOR_REQUIRED";
+        public const string InvalidDisplayOrder = "SUBJECT.INVALID_DISPLAY_ORDER";
+        public const string NotFound = "SUBJECT.NOT_FOUND";
+    }
+
+    // ===== SCHOOL TYPE ERRORS =====
+    public static class SchoolType
+    {
+        public const string NameRequired = "SCHOOL_TYPE.NAME_REQUIRED";
+        public const string NameTooLong = "SCHOOL_TYPE.NAME_TOO_LONG";
+        public const string NotFound = "SCHOOL_TYPE.NOT_FOUND";
+    }
+
+    // ===== COURSE CATEGORY ERRORS =====
+    public static class CourseCategory
+    {
+        public const string NameRequired = "COURSE_CATEGORY.NAME_REQUIRED";
+        public const string NameTooLong = "COURSE_CATEGORY.NAME_TOO_LONG";
+        public const string NotFound = "COURSE_CATEGORY.NOT_FOUND";
+    }
+
     // ===== COURSE ERRORS =====
     public static class Course
     {
@@ -41,6 +77,12 @@ public static class ErrorCodes
         public const string AlreadyPublished = "COURSE.ALREADY_PUBLISHED";
         public const string NotPublished = "COURSE.NOT_PUBLISHED";
         public const string Unauthorized = "COURSE.UNAUTHORIZED";
+        public const string TitleRequired = "COURSE.TITLE_REQUIRED";
+        public const string TitleTooLong = "COURSE.TITLE_TOO_LONG";
+        public const string DescriptionRequired = "COURSE.DESCRIPTION_REQUIRED";
+        public const string ThumbnailRequired = "COURSE.THUMBNAIL_REQUIRED";
+        public const string InvalidStudyLevel = "COURSE.INVALID_STUDY_LEVEL";
+        public const string InvalidTrack = "COURSE.INVALID_TRACK";
     }
 
     // ===== MODULE ERRORS =====
@@ -49,6 +91,19 @@ public static class ErrorCodes
         public const string NotFound = "MODULE.NOT_FOUND";
         public const string NotAccessible = "MODULE.NOT_ACCESSIBLE";
         public const string NotEnrolled = "MODULE.NOT_ENROLLED";
+        public const string TitleRequired = "MODULE.TITLE_REQUIRED";
+        public const string TitleTooLong = "MODULE.TITLE_TOO_LONG";
+        public const string InvalidDisplayOrder = "MODULE.INVALID_DISPLAY_ORDER";
+        public const string InvalidEstimatedHours = "MODULE.INVALID_ESTIMATED_HOURS";
+    }
+
+    // ===== STAGE ERRORS =====
+    public static class Stage
+    {
+        public const string NotFound = "STAGE.NOT_FOUND";
+        public const string TitleRequired = "STAGE.TITLE_REQUIRED";
+        public const string TitleTooLong = "STAGE.TITLE_TOO_LONG";
+        public const string InvalidDisplayOrder = "STAGE.INVALID_DISPLAY_ORDER";
     }
 
     // ===== CONTENT ERRORS =====
@@ -57,6 +112,45 @@ public static class ErrorCodes
         public const string NotFound = "CONTENT.NOT_FOUND";
         public const string PrerequisiteNotMet = "CONTENT.PREREQUISITE_NOT_MET";
         public const string NotAccessible = "CONTENT.NOT_ACCESSIBLE";
+        public const string InvalidContentType = "CONTENT.INVALID_CONTENT_TYPE";
+        public const string TitleRequired = "CONTENT.TITLE_REQUIRED";
+        public const string TitleTooLong = "CONTENT.TITLE_TOO_LONG";
+        public const string InvalidDisplayOrder = "CONTENT.INVALID_DISPLAY_ORDER";
+        public const string InvalidXpReward = "CONTENT.INVALID_XP_REWARD";
+        public const string InvalidPurchasingPointsReward = "CONTENT.INVALID_PURCHASING_POINTS_REWARD";
+        public const string FileNameRequired = "CONTENT.FILE_NAME_REQUIRED";
+        public const string FileNameTooLong = "CONTENT.FILE_NAME_TOO_LONG";
+        public const string FileUrlRequired = "CONTENT.FILE_URL_REQUIRED";
+        public const string InvalidFileSize = "CONTENT.INVALID_FILE_SIZE";
+        public const string MimeTypeRequired = "CONTENT.MIME_TYPE_REQUIRED";
+        public const string MimeTypeTooLong = "CONTENT.MIME_TYPE_TOO_LONG";
+        public const string ProviderIdRequired = "CONTENT.PROVIDER_ID_REQUIRED";
+        public const string ProviderIdTooLong = "CONTENT.PROVIDER_ID_TOO_LONG";
+        public const string ExternalVideoIdRequired = "CONTENT.EXTERNAL_VIDEO_ID_REQUIRED";
+        public const string ExternalVideoIdTooLong = "CONTENT.EXTERNAL_VIDEO_ID_TOO_LONG";
+        public const string InvalidDuration = "CONTENT.INVALID_DURATION";
+        public const string VideoAlreadyReady = "CONTENT.VIDEO_ALREADY_READY";
+        public const string StorageProviderRequired = "CONTENT.STORAGE_PROVIDER_REQUIRED";
+        public const string StorageProviderTooLong = "CONTENT.STORAGE_PROVIDER_TOO_LONG";
+        public const string StoragePathRequired = "CONTENT.STORAGE_PATH_REQUIRED";
+        public const string StoragePathTooLong = "CONTENT.STORAGE_PATH_TOO_LONG";
+        public const string FileExtensionRequired = "CONTENT.FILE_EXTENSION_REQUIRED";
+        public const string FileExtensionTooLong = "CONTENT.FILE_EXTENSION_TOO_LONG";
+    }
+
+    // ===== PRODUCT ERRORS =====
+    public static class Product
+    {
+        public const string NotFound = "PRODUCT.NOT_FOUND";
+        public const string InvalidPrice = "PRODUCT.INVALID_PRICE";
+        public const string InvalidDiscount = "PRODUCT.INVALID_DISCOUNT";
+        public const string InvalidPurchasingPoints = "PRODUCT.INVALID_PURCHASING_POINTS";
+        public const string NoPriceSpecified = "PRODUCT.NO_PRICE_SPECIFIED";
+        public const string InvalidCashPrice = "PRODUCT.INVALID_CASH_PRICE";
+        public const string InvalidPointsPrice = "PRODUCT.INVALID_POINTS_PRICE";
+        public const string InvalidPointsReward = "PRODUCT.INVALID_POINTS_REWARD";
+        public const string InvalidDiscountPercentage = "PRODUCT.INVALID_DISCOUNT_PERCENTAGE";
+        public const string InvalidReferenceId = "PRODUCT.INVALID_REFERENCE_ID";
     }
 
     // ===== ASSESSMENT ERRORS =====
@@ -68,6 +162,22 @@ public static class ErrorCodes
         public const string NotStarted = "ASSESSMENT.NOT_STARTED";
         public const string TimeExpired = "ASSESSMENT.TIME_EXPIRED";
         public const string InvalidAttempt = "ASSESSMENT.INVALID_ATTEMPT";
+    }
+
+    // ===== PREREQUISITE ERRORS =====
+    public static class Prerequisite
+    {
+        public const string NotFound = "PREREQUISITE.NOT_FOUND";
+        public const string NameRequired = "PREREQUISITE.NAME_REQUIRED";
+        public const string NameTooLong = "PREREQUISITE.NAME_TOO_LONG";
+        public const string InvalidTargetType = "PREREQUISITE.INVALID_TARGET_TYPE";
+        public const string InvalidLogicOperator = "PREREQUISITE.INVALID_LOGIC_OPERATOR";
+        public const string NoConditions = "PREREQUISITE.NO_CONDITIONS";
+        public const string NoActions = "PREREQUISITE.NO_ACTIONS";
+        public const string InvalidConditionType = "PREREQUISITE.INVALID_CONDITION_TYPE";
+        public const string InvalidActionType = "PREREQUISITE.INVALID_ACTION_TYPE";
+        public const string InvalidConditionParameters = "PREREQUISITE.INVALID_CONDITION_PARAMETERS";
+        public const string InvalidActionParameters = "PREREQUISITE.INVALID_ACTION_PARAMETERS";
     }
 
     // ===== STUDY PLAN ERRORS =====

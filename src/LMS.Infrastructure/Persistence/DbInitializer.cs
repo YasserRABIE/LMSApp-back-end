@@ -1,3 +1,6 @@
+using LMS.Application.Common.Interfaces;
+using LMS.Domain.Common;
+using LMS.Domain.Content;
 using LMS.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,8 +19,8 @@ public static class DbInitializer
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
+        var context = scope.ServiceProvider.GetRequiredService<LmsDbContext>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<LmsDbContext>>();
 
         try
         {
@@ -27,7 +30,8 @@ public static class DbInitializer
             logger.LogInformation("Database migrations applied successfully");
 
             // Seed reference data
-            await SeedReferenceDataAsync(context, logger);
+            var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+            await SeedReferenceDataAsync(context, passwordHasher, logger);
         }
         catch (Exception ex)
         {
@@ -36,12 +40,15 @@ public static class DbInitializer
         }
     }
 
-    private static async Task SeedReferenceDataAsync(ApplicationDbContext context, ILogger logger)
+    private static async Task SeedReferenceDataAsync(LmsDbContext context, IPasswordHasher passwordHasher, ILogger logger)
     {
         // Check if data already exists
         if (await context.StudyLevels.AnyAsync())
         {
             logger.LogInformation("Reference data already seeded, skipping...");
+
+            // Seed teacher user if not exists
+            await SeedTeacherUserAsync(context, passwordHasher, logger);
             return;
         }
 
@@ -183,6 +190,166 @@ public static class DbInitializer
         await context.SaveChangesAsync();
         logger.LogInformation("Seeded {Count} study level-track combinations", studyLevelTracks.Count);
 
+        // Seed content reference data
+        await SeedContentReferenceDataAsync(context, logger);
+
+        // Seed teacher user
+        await SeedTeacherUserAsync(context, passwordHasher, logger);
+
         logger.LogInformation("Reference data seeding completed successfully");
+    }
+
+    private static async Task SeedContentReferenceDataAsync(LmsDbContext context, ILogger logger)
+    {
+        // Seed SchoolTypes
+        if (!await context.SchoolTypes.AnyAsync())
+        {
+            logger.LogInformation("Seeding school types...");
+
+            var schoolTypeData = new List<(string name, int order)>
+            {
+                ("أزهر", 1),
+                ("عام", 2),
+                ("أزهروعام", 3)
+            };
+
+            var schoolTypes = new List<SchoolType>();
+            foreach (var (name, order) in schoolTypeData)
+            {
+                var result = SchoolType.Create(name, order);
+                if (result.IsSuccess)
+                {
+                    schoolTypes.Add(result.Value);
+                }
+            }
+
+            await context.SchoolTypes.AddRangeAsync(schoolTypes);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Seeded {Count} school types", schoolTypes.Count);
+        }
+
+        // Seed CourseCategories
+        if (!await context.CourseCategories.AnyAsync())
+        {
+            logger.LogInformation("Seeding course categories...");
+
+            var courseCategoryData = new List<(string name, int order)>
+            {
+                ("شرح", 1),
+                ("مراجعة", 2),
+                ("شرحومراجعة", 3)
+            };
+
+            var courseCategories = new List<CourseCategory>();
+            foreach (var (name, order) in courseCategoryData)
+            {
+                var result = CourseCategory.Create(name, order);
+                if (result.IsSuccess)
+                {
+                    courseCategories.Add(result.Value);
+                }
+            }
+
+            await context.CourseCategories.AddRangeAsync(courseCategories);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Seeded {Count} course categories", courseCategories.Count);
+        }
+
+        // Seed Subjects
+        if (!await context.Subjects.AnyAsync())
+        {
+            logger.LogInformation("Seeding subjects...");
+
+            var subjectData = new List<(string name, string icon, string color, bool isCore, int order)>
+            {
+                ("فيزياء", "🔬", "#4A90E2", true, 1),
+                ("كيمياء", "⚗️", "#50E3C2", true, 2),
+                ("أحياء", "🧬", "#7ED321", true, 3),
+                ("رياضيات", "📐", "#F5A623", true, 4),
+                ("جبر", "∑", "#BD10E0", true, 5),
+                ("هندسة", "📏", "#9013FE", true, 6),
+                ("لغة عربية", "📖", "#D0021B", true, 7),
+                ("لغة إنجليزية", "🇬🇧", "#417505", true, 8),
+                ("لغة فرنسية", "🇫🇷", "#0070D2", false, 9),
+                ("تاريخ", "🏛️", "#8B572A", false, 10),
+                ("جغرافيا", "🌍", "#2ECC71", false, 11),
+                ("فلسفة", "🤔", "#34495E", false, 12)
+            };
+
+            var subjects = new List<Subject>();
+            foreach (var (name, icon, color, isCore, order) in subjectData)
+            {
+                var result = Subject.Create(name, icon, color, isCore, order);
+                if (result.IsSuccess)
+                {
+                    subjects.Add(result.Value);
+                }
+            }
+
+            await context.Subjects.AddRangeAsync(subjects);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Seeded {Count} subjects", subjects.Count);
+        }
+    }
+
+    private static async Task SeedTeacherUserAsync(LmsDbContext context, IPasswordHasher passwordHasher, ILogger logger)
+    {
+        // Check if teacher user already exists
+        var existingTeacher = await context.Users
+            .Where(u => u.UserType == UserType.Teacher)
+            .FirstOrDefaultAsync();
+
+        if (existingTeacher != null)
+        {
+            logger.LogInformation("Teacher user already exists, skipping...");
+            return;
+        }
+
+        logger.LogInformation("Seeding teacher user...");
+
+        // Create teacher user
+        var phone = Phone.Create("01000000001");
+        if (phone.IsFailure)
+        {
+            logger.LogError("Failed to create teacher phone: {ErrorCode}", phone.Error.Code);
+            return;
+        }
+
+        var passwordHash = passwordHasher.HashPassword("Teacher@123");
+
+        var teacherResult = User.Create(
+            phone.Value,
+            passwordHash,
+            "أحمد",
+            "محمد",
+            "إبراهيم",
+            UserType.Teacher,
+            isPhoneVerified: true);
+
+        if (teacherResult.IsFailure)
+        {
+            logger.LogError("Failed to create teacher user: {ErrorCode}", teacherResult.Error.Code);
+            return;
+        }
+
+        // Create teacher profile
+        var teacherProfileResult = TeacherProfile.Create(
+            teacherResult.Value.Id,
+            bio: "أستاذ متخصص في الفيزياء",
+            specialization: "فيزياء",
+            yearsOfExperience: 10,
+            qualifications: "بكالوريوس علوم فيزياء");
+
+        if (teacherProfileResult.IsFailure)
+        {
+            logger.LogError("Failed to create teacher profile: {ErrorCode}", teacherProfileResult.Error.Code);
+            return;
+        }
+
+        await context.Users.AddAsync(teacherResult.Value);
+        await context.TeacherProfiles.AddAsync(teacherProfileResult.Value);
+        await context.SaveChangesAsync();
+
+        logger.LogInformation("Seeded teacher user: Phone=01000000001, Password=Teacher@123");
     }
 }

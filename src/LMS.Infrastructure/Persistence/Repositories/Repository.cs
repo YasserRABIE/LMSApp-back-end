@@ -11,10 +11,10 @@ public class Repository<TEntity, TEntityId> : IRepository<TEntity, TEntityId>
     where TEntity : Entity<TEntityId>
     where TEntityId : notnull
 {
-    protected readonly ApplicationDbContext _context;
+    protected readonly LmsDbContext _context;
     protected readonly DbSet<TEntity> _dbSet;
 
-    public Repository(ApplicationDbContext context)
+    public Repository(LmsDbContext context)
     {
         _context = context;
         _dbSet = context.Set<TEntity>();

@@ -10,17 +10,13 @@ public sealed class SubjectConfiguration : IEntityTypeConfiguration<Subject>
     {
         builder.ToTable("Subject");
         builder.HasKey(s => s.Id);
-
-        builder.Property(s => s.Name).HasMaxLength(200).IsRequired();
-        builder.Property(s => s.NameEn).HasMaxLength(200);
-        builder.Property(s => s.Icon).HasMaxLength(500);
-        builder.Property(s => s.Color).HasMaxLength(7);
+        builder.Property(s => s.Id).HasConversion(id => id.Value, value => SubjectId.From(value)).ValueGeneratedNever();
+        builder.Property(s => s.Name).HasMaxLength(100).IsRequired();
+        builder.Property(s => s.Icon).HasMaxLength(500).IsRequired();
+        builder.Property(s => s.Color).HasMaxLength(7).IsRequired();
         builder.Property(s => s.IsCore).IsRequired();
-        builder.Property(s => s.IsActive).IsRequired().HasDefaultValue(true);
         builder.Property(s => s.DisplayOrder).IsRequired();
-        builder.Property(s => s.CreatedAtUtc).IsRequired();
-        builder.Property(s => s.UpdatedAtUtc).IsRequired();
-
+        builder.Property(s => s.IsActive).IsRequired().HasDefaultValue(true);
         builder.HasIndex(s => s.DisplayOrder).HasDatabaseName("IX_Subject_DisplayOrder");
     }
 }

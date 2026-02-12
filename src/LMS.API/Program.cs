@@ -1,5 +1,7 @@
+using LMS.API.Authorization;
 using LMS.API.Middleware;
 using LMS.Application;
+using LMS.Domain.Users;
 using LMS.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -63,7 +65,37 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // Single role policies
+    options.AddPolicy(Policies.StudentOnly, policy =>
+        policy.RequireRole(nameof(UserType.Student)));
+
+    options.AddPolicy(Policies.TeacherOnly, policy =>
+        policy.RequireRole(nameof(UserType.Teacher)));
+
+    options.AddPolicy(Policies.AssistantOnly, policy =>
+        policy.RequireRole(nameof(UserType.Assistant)));
+
+    options.AddPolicy(Policies.ParentOnly, policy =>
+        policy.RequireRole(nameof(UserType.Parent)));
+
+    options.AddPolicy(Policies.AdminOnly, policy =>
+        policy.RequireRole(nameof(UserType.Admin)));
+
+    // Combined role policies
+    options.AddPolicy(Policies.TeachersAndAdmins, policy =>
+        policy.RequireRole(nameof(UserType.Teacher), nameof(UserType.Admin)));
+
+    options.AddPolicy(Policies.AssistantsAndAdmins, policy =>
+        policy.RequireRole(nameof(UserType.Assistant), nameof(UserType.Admin)));
+
+    options.AddPolicy(Policies.StudentsAndParents, policy =>
+        policy.RequireRole(nameof(UserType.Student), nameof(UserType.Parent)));
+
+    options.AddPolicy(Policies.AllAuthenticated, policy =>
+        policy.RequireAuthenticatedUser());
+});
 
 // CORS
 builder.Services.AddCors(options =>
@@ -86,7 +118,7 @@ builder.Services.AddOpenApi(options =>
         {
             Title = "LMS API",
             Version = "v1",
-            Description = "Egyptian Learning Management System API - Authentication & User Management"
+            Description = "Egyptian Learning Management System API"
         };
 
         // Add JWT authentication to Swagger

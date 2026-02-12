@@ -26,21 +26,97 @@ public static class ErrorMessages
         [Domain.Common.ErrorCodes.Auth.InvalidVerificationToken] = "رمز التحقق غير صالح",
         [Domain.Common.ErrorCodes.Auth.MaxDevicesReached] = "تم الوصول للحد الأقصى من الأجهزة المسموح بها",
 
+        // ===== TAG ERRORS =====
+        [Domain.Common.ErrorCodes.Tag.NameRequired] = "اسم الوسم مطلوب",
+        [Domain.Common.ErrorCodes.Tag.NameTooLong] = "اسم الوسم لا يمكن أن يتجاوز 50 حرف",
+        [Domain.Common.ErrorCodes.Tag.NotFound] = "لم يتم العثور على الوسم",
+        [Domain.Common.ErrorCodes.Tag.AlreadyExists] = "الوسم موجود بالفعل",
+
+        // ===== SUBJECT ERRORS =====
+        [Domain.Common.ErrorCodes.Subject.NameRequired] = "اسم المادة مطلوب",
+        [Domain.Common.ErrorCodes.Subject.NameTooLong] = "اسم المادة لا يمكن أن يتجاوز 100 حرف",
+        [Domain.Common.ErrorCodes.Subject.IconRequired] = "أيقونة المادة مطلوبة",
+        [Domain.Common.ErrorCodes.Subject.ColorRequired] = "لون المادة مطلوب",
+        [Domain.Common.ErrorCodes.Subject.InvalidDisplayOrder] = "ترتيب العرض غير صالح",
+        [Domain.Common.ErrorCodes.Subject.NotFound] = "لم يتم العثور على المادة",
+
+        // ===== SCHOOL TYPE ERRORS =====
+        [Domain.Common.ErrorCodes.SchoolType.NameRequired] = "اسم نوع المدرسة مطلوب",
+        [Domain.Common.ErrorCodes.SchoolType.NameTooLong] = "اسم نوع المدرسة لا يمكن أن يتجاوز 50 حرف",
+        [Domain.Common.ErrorCodes.SchoolType.NotFound] = "لم يتم العثور على نوع المدرسة",
+
+        // ===== COURSE CATEGORY ERRORS =====
+        [Domain.Common.ErrorCodes.CourseCategory.NameRequired] = "اسم فئة الكورس مطلوب",
+        [Domain.Common.ErrorCodes.CourseCategory.NameTooLong] = "اسم فئة الكورس لا يمكن أن يتجاوز 50 حرف",
+        [Domain.Common.ErrorCodes.CourseCategory.NotFound] = "لم يتم العثور على فئة الكورس",
+
         // ===== COURSE ERRORS =====
         [Domain.Common.ErrorCodes.Course.NotFound] = "لم يتم العثور على الكورس",
         [Domain.Common.ErrorCodes.Course.AlreadyPublished] = "الكورس منشور بالفعل",
         [Domain.Common.ErrorCodes.Course.NotPublished] = "الكورس غير منشور",
         [Domain.Common.ErrorCodes.Course.Unauthorized] = "غير مصرح لك بالوصول لهذا الكورس",
+        [Domain.Common.ErrorCodes.Course.TitleRequired] = "عنوان الكورس مطلوب",
+        [Domain.Common.ErrorCodes.Course.TitleTooLong] = "عنوان الكورس لا يمكن أن يتجاوز 300 حرف",
+        [Domain.Common.ErrorCodes.Course.DescriptionRequired] = "وصف الكورس مطلوب",
+        [Domain.Common.ErrorCodes.Course.ThumbnailRequired] = "صورة الكورس مطلوبة",
+        [Domain.Common.ErrorCodes.Course.InvalidStudyLevel] = "المستوى الدراسي غير صالح",
+        [Domain.Common.ErrorCodes.Course.InvalidTrack] = "المسار الدراسي غير صالح",
 
         // ===== MODULE ERRORS =====
         [Domain.Common.ErrorCodes.Module.NotFound] = "لم يتم العثور على الوحدة",
         [Domain.Common.ErrorCodes.Module.NotAccessible] = "الوحدة غير متاحة",
         [Domain.Common.ErrorCodes.Module.NotEnrolled] = "لم تقم بالتسجيل في هذه الوحدة",
+        [Domain.Common.ErrorCodes.Module.TitleRequired] = "عنوان الوحدة مطلوب",
+        [Domain.Common.ErrorCodes.Module.TitleTooLong] = "عنوان الوحدة لا يمكن أن يتجاوز 300 حرف",
+        [Domain.Common.ErrorCodes.Module.InvalidDisplayOrder] = "ترتيب العرض غير صالح",
+        [Domain.Common.ErrorCodes.Module.InvalidEstimatedHours] = "عدد الساعات المقدرة غير صالح",
+
+        // ===== STAGE ERRORS =====
+        [Domain.Common.ErrorCodes.Stage.NotFound] = "لم يتم العثور على المرحلة",
+        [Domain.Common.ErrorCodes.Stage.TitleRequired] = "عنوان المرحلة مطلوب",
+        [Domain.Common.ErrorCodes.Stage.TitleTooLong] = "عنوان المرحلة لا يمكن أن يتجاوز 300 حرف",
+        [Domain.Common.ErrorCodes.Stage.InvalidDisplayOrder] = "ترتيب العرض غير صالح",
 
         // ===== CONTENT ERRORS =====
         [Domain.Common.ErrorCodes.Content.NotFound] = "لم يتم العثور على المحتوى",
         [Domain.Common.ErrorCodes.Content.PrerequisiteNotMet] = "يجب إكمال المحتوى المطلوب أولاً",
         [Domain.Common.ErrorCodes.Content.NotAccessible] = "المحتوى غير متاح",
+        [Domain.Common.ErrorCodes.Content.InvalidContentType] = "نوع المحتوى غير صالح",
+        [Domain.Common.ErrorCodes.Content.TitleRequired] = "عنوان المحتوى مطلوب",
+        [Domain.Common.ErrorCodes.Content.TitleTooLong] = "عنوان المحتوى لا يمكن أن يتجاوز 300 حرف",
+        [Domain.Common.ErrorCodes.Content.InvalidDisplayOrder] = "ترتيب العرض غير صالح",
+        [Domain.Common.ErrorCodes.Content.InvalidXpReward] = "نقاط الخبرة غير صالحة",
+        [Domain.Common.ErrorCodes.Content.InvalidPurchasingPointsReward] = "نقاط الشراء غير صالحة",
+        [Domain.Common.ErrorCodes.Content.FileNameRequired] = "اسم الملف مطلوب",
+        [Domain.Common.ErrorCodes.Content.FileNameTooLong] = "اسم الملف لا يمكن أن يتجاوز 300 حرف",
+        [Domain.Common.ErrorCodes.Content.FileUrlRequired] = "رابط الملف مطلوب",
+        [Domain.Common.ErrorCodes.Content.InvalidFileSize] = "حجم الملف غير صالح",
+        [Domain.Common.ErrorCodes.Content.MimeTypeRequired] = "نوع الملف مطلوب",
+        [Domain.Common.ErrorCodes.Content.MimeTypeTooLong] = "نوع الملف لا يمكن أن يتجاوز 100 حرف",
+        [Domain.Common.ErrorCodes.Content.ProviderIdRequired] = "معرّف مزود الخدمة مطلوب",
+        [Domain.Common.ErrorCodes.Content.ProviderIdTooLong] = "معرّف مزود الخدمة لا يمكن أن يتجاوز 50 حرف",
+        [Domain.Common.ErrorCodes.Content.ExternalVideoIdRequired] = "معرّف الفيديو الخارجي مطلوب",
+        [Domain.Common.ErrorCodes.Content.ExternalVideoIdTooLong] = "معرّف الفيديو الخارجي لا يمكن أن يتجاوز 500 حرف",
+        [Domain.Common.ErrorCodes.Content.InvalidDuration] = "مدة الفيديو غير صالحة",
+        [Domain.Common.ErrorCodes.Content.VideoAlreadyReady] = "الفيديو جاهز بالفعل",
+        [Domain.Common.ErrorCodes.Content.StorageProviderRequired] = "مزود التخزين مطلوب",
+        [Domain.Common.ErrorCodes.Content.StorageProviderTooLong] = "مزود التخزين لا يمكن أن يتجاوز 20 حرف",
+        [Domain.Common.ErrorCodes.Content.StoragePathRequired] = "مسار التخزين مطلوب",
+        [Domain.Common.ErrorCodes.Content.StoragePathTooLong] = "مسار التخزين لا يمكن أن يتجاوز 1000 حرف",
+        [Domain.Common.ErrorCodes.Content.FileExtensionRequired] = "امتداد الملف مطلوب",
+        [Domain.Common.ErrorCodes.Content.FileExtensionTooLong] = "امتداد الملف لا يمكن أن يتجاوز 20 حرف",
+
+        // ===== PRODUCT ERRORS =====
+        [Domain.Common.ErrorCodes.Product.NotFound] = "لم يتم العثور على المنتج",
+        [Domain.Common.ErrorCodes.Product.InvalidPrice] = "السعر غير صالح",
+        [Domain.Common.ErrorCodes.Product.InvalidDiscount] = "نسبة الخصم غير صالحة",
+        [Domain.Common.ErrorCodes.Product.InvalidPurchasingPoints] = "نقاط الشراء غير صالحة",
+        [Domain.Common.ErrorCodes.Product.NoPriceSpecified] = "يجب تحديد سعر نقدي أو نقاط شراء",
+        [Domain.Common.ErrorCodes.Product.InvalidCashPrice] = "السعر النقدي غير صالح",
+        [Domain.Common.ErrorCodes.Product.InvalidPointsPrice] = "سعر النقاط غير صالح",
+        [Domain.Common.ErrorCodes.Product.InvalidPointsReward] = "مكافأة النقاط غير صالحة",
+        [Domain.Common.ErrorCodes.Product.InvalidDiscountPercentage] = "نسبة الخصم يجب أن تكون بين 0 و 100",
+        [Domain.Common.ErrorCodes.Product.InvalidReferenceId] = "معرّف المرجع غير صالح",
 
         // ===== ASSESSMENT ERRORS =====
         [Domain.Common.ErrorCodes.Assessment.NotFound] = "لم يتم العثور على التقييم",
@@ -49,6 +125,19 @@ public static class ErrorMessages
         [Domain.Common.ErrorCodes.Assessment.NotStarted] = "لم يتم بدء التقييم بعد",
         [Domain.Common.ErrorCodes.Assessment.TimeExpired] = "انتهى وقت التقييم",
         [Domain.Common.ErrorCodes.Assessment.InvalidAttempt] = "محاولة غير صالحة",
+
+        // ===== PREREQUISITE ERRORS =====
+        [Domain.Common.ErrorCodes.Prerequisite.NotFound] = "لم يتم العثور على الشرط المسبق",
+        [Domain.Common.ErrorCodes.Prerequisite.NameRequired] = "اسم الشرط المسبق مطلوب",
+        [Domain.Common.ErrorCodes.Prerequisite.NameTooLong] = "اسم الشرط المسبق لا يمكن أن يتجاوز 200 حرف",
+        [Domain.Common.ErrorCodes.Prerequisite.InvalidTargetType] = "نوع الهدف غير صالح",
+        [Domain.Common.ErrorCodes.Prerequisite.InvalidLogicOperator] = "المعامل المنطقي غير صالح",
+        [Domain.Common.ErrorCodes.Prerequisite.NoConditions] = "يجب إضافة شرط واحد على الأقل",
+        [Domain.Common.ErrorCodes.Prerequisite.NoActions] = "يجب إضافة إجراء واحد على الأقل",
+        [Domain.Common.ErrorCodes.Prerequisite.InvalidConditionType] = "نوع الشرط غير صالح",
+        [Domain.Common.ErrorCodes.Prerequisite.InvalidActionType] = "نوع الإجراء غير صالح",
+        [Domain.Common.ErrorCodes.Prerequisite.InvalidConditionParameters] = "معاملات الشرط غير صالحة",
+        [Domain.Common.ErrorCodes.Prerequisite.InvalidActionParameters] = "معاملات الإجراء غير صالحة",
 
         // ===== STUDY PLAN ERRORS =====
         [Domain.Common.ErrorCodes.StudyPlan.NotFound] = "لم يتم العثور على الخطة الدراسية",

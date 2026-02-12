@@ -10,50 +10,17 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.ToTable("Product");
         builder.HasKey(p => p.Id);
+        builder.Property(p => p.Id).HasConversion(id => id.Value, value => ProductId.From(value)).ValueGeneratedNever();
         builder.Property(p => p.ProductType).HasConversion<int>().IsRequired();
-        builder.Property(p => p.ModuleId);
-        builder.Property(p => p.ContentItemId);
-        builder.Property(p => p.PointsPackageId);
-        builder.Property(p => p.Name).HasMaxLength(300).IsRequired();
-        builder.Property(p => p.Description).HasColumnType("text");
-        builder.Property(p => p.ThumbnailUrl).HasMaxLength(500);
-        builder.Property(p => p.PriceEgp).HasPrecision(10, 2).IsRequired();
-        builder.Property(p => p.PointsPrice).IsRequired().HasDefaultValue(0);
-        builder.Property(p => p.AllowPointsPurchase).IsRequired().HasDefaultValue(true);
-        builder.Property(p => p.DiscountedPriceEgp).HasPrecision(10, 2);
-        builder.Property(p => p.DiscountStartUtc);
-        builder.Property(p => p.DiscountEndUtc);
-        builder.Property(p => p.ParentProductId);
+        builder.Property(p => p.ReferenceId).IsRequired();
+        builder.Property(p => p.CashPrice).HasPrecision(10, 2);
+        builder.Property(p => p.PurchasingPointsPrice);
+        builder.Property(p => p.PurchasingPointsReward).IsRequired().HasDefaultValue(0);
+        builder.Property(p => p.DiscountPercentage).HasPrecision(5, 2);
         builder.Property(p => p.IsActive).IsRequired().HasDefaultValue(true);
-        builder.Property(p => p.DisplayOrder).IsRequired().HasDefaultValue(0);
-        builder.Property(p => p.CreatedAtUtc).IsRequired();
-        builder.Property(p => p.UpdatedAtUtc).IsRequired();
+        builder.HasIndex(p => new { p.ProductType, p.ReferenceId }).HasDatabaseName("IX_Product_Reference");
         builder.HasIndex(p => new { p.ProductType, p.IsActive }).HasDatabaseName("IX_Product_Type");
-        builder.HasIndex(p => p.ModuleId).HasDatabaseName("IX_Product_Module");
-    }
-}
-
-public sealed class PromoCodeConfiguration : IEntityTypeConfiguration<PromoCode>
-{
-    public void Configure(EntityTypeBuilder<PromoCode> builder)
-    {
-        builder.ToTable("PromoCode");
-        builder.HasKey(p => p.Id);
-        builder.Property(p => p.Code).HasMaxLength(50).IsRequired();
-        builder.Property(p => p.DiscountType).HasConversion<int>().IsRequired();
-        builder.Property(p => p.DiscountValue).HasPrecision(10, 2).IsRequired();
-        builder.Property(p => p.MaxTotalUses);
-        builder.Property(p => p.CurrentTotalUses).IsRequired().HasDefaultValue(0);
-        builder.Property(p => p.MaxUsesPerUser).IsRequired().HasDefaultValue(1);
-        builder.Property(p => p.MinOrderAmountEgp).HasPrecision(10, 2);
-        builder.Property(p => p.ValidFromUtc).IsRequired();
-        builder.Property(p => p.ValidUntilUtc).IsRequired();
-        builder.Property(p => p.IsActive).IsRequired().HasDefaultValue(true);
-        builder.Property(p => p.CreatedByUserId).IsRequired();
-        builder.Property(p => p.CreatedAtUtc).IsRequired();
-        builder.Property(p => p.UpdatedAtUtc).IsRequired();
-        builder.HasIndex(p => p.Code).IsUnique().HasDatabaseName("UQ_PromoCode_Code");
-        builder.HasIndex(p => new { p.IsActive, p.ValidFromUtc, p.ValidUntilUtc }).HasDatabaseName("IX_PromoCode_Valid");
+        builder.Ignore(p => p.DomainEvents);
     }
 }
 

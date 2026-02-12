@@ -18,7 +18,13 @@ public sealed class Phone : ValueObject
         RegexOptions.Compiled | RegexOptions.IgnoreCase
     );
 
-    public string Value { get; }
+    public string Value { get; private set; }
+
+    // Parameterless constructor for EF Core
+    private Phone()
+    {
+        Value = string.Empty;
+    }
 
     private Phone(string value)
     {

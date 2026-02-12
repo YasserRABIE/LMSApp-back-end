@@ -22,14 +22,14 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Database
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddDbContext<LmsDbContext>(options =>
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found");
 
             options.UseNpgsql(connectionString, npgsqlOptions =>
             {
-                npgsqlOptions.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                npgsqlOptions.MigrationsAssembly(typeof(LmsDbContext).Assembly.FullName);
                 npgsqlOptions.EnableRetryOnFailure(
                     maxRetryCount: 3,
                     maxRetryDelay: TimeSpan.FromSeconds(5),
@@ -69,6 +69,16 @@ public static class DependencyInjection
         // Repositories
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ICourseRepository, CourseRepository>();
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+        services.AddScoped<IStageRepository, StageRepository>();
+        services.AddScoped<IContentItemRepository, ContentItemRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<ISubjectRepository, SubjectRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
+        services.AddScoped<ISchoolTypeRepository, SchoolTypeRepository>();
+        services.AddScoped<ICourseCategoryRepository, CourseCategoryRepository>();
+        services.AddScoped<IPrerequisiteRepository, PrerequisiteRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Services
@@ -77,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IOtpService, OtpService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddScoped<IPrerequisiteEvaluationService, PrerequisiteEvaluationService>();
 
         // External Services
         services.AddSingleton<HttpClient>();

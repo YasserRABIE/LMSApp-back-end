@@ -14,6 +14,19 @@ public static class SuccessMessages
     public const string CourseCreated = "تم إنشاء الكورس بنجاح";
     public const string CourseUpdated = "تم تحديث الكورس بنجاح";
     public const string CoursePublished = "تم نشر الكورس بنجاح";
+    public const string CourseDeleted = "تم حذف الكورس بنجاح";
+
+    public const string ModuleCreated = "تم إنشاء الوحدة بنجاح";
+    public const string ModuleUpdated = "تم تحديث الوحدة بنجاح";
+    public const string ModuleDeleted = "تم حذف الوحدة بنجاح";
+
+    public const string StageCreated = "تم إنشاء المرحلة بنجاح";
+    public const string StageUpdated = "تم تحديث المرحلة بنجاح";
+    public const string StageDeleted = "تم حذف المرحلة بنجاح";
+
+    public const string ContentItemCreated = "تم إنشاء المحتوى بنجاح";
+    public const string ContentItemUpdated = "تم تحديث المحتوى بنجاح";
+    public const string ContentItemDeleted = "تم حذف المحتوى بنجاح";
 
     public const string ProgressUpdated = "تم تحديث التقدم بنجاح";
     public const string ContentCompleted = "تم إكمال المحتوى بنجاح";
@@ -44,6 +57,16 @@ public static class SuccessMessages
     public const string ProfileUpdated = "تم تحديث الملف الشخصي بنجاح";
     public const string PasswordChanged = "تم تغيير كلمة المرور بنجاح";
     public const string NotificationSettingsUpdated = "تم تحديث إعدادات الإشعارات بنجاح";
+
+    public const string PrerequisiteCreated = "تم إنشاء الشرط المسبق بنجاح";
+    public const string PrerequisiteUpdated = "تم تحديث الشرط المسبق بنجاح";
+    public const string PrerequisiteDeleted = "تم حذف الشرط المسبق بنجاح";
+    public const string PrerequisiteActivated = "تم تفعيل الشرط المسبق بنجاح";
+    public const string PrerequisiteDeactivated = "تم تعطيل الشرط المسبق بنجاح";
+    public const string ConditionAdded = "تم إضافة الشرط بنجاح";
+    public const string ConditionRemoved = "تم حذف الشرط بنجاح";
+    public const string ActionAdded = "تم إضافة الإجراء بنجاح";
+    public const string ActionRemoved = "تم حذف الإجراء بنجاح";
 
     public const string OperationSuccess = "تمت العملية بنجاح";
     public const string DataSaved = "تم حفظ البيانات بنجاح";

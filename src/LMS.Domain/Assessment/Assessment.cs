@@ -176,7 +176,7 @@ public sealed class Assessment : AggregateRoot<AssessmentId>
         XpRewardIfLate = 0;
         PointsRewardIfLate = 0;
         GradingRubricId = gradingRubricId;
-        Visibility = Visibility.Draft;
+        Visibility = Visibility.Hidden;
         IsActive = true;
     }
 
@@ -401,7 +401,7 @@ public sealed class Assessment : AggregateRoot<AssessmentId>
     /// <summary>
     /// Unpublishes the assessment
     /// </summary>
-    public void Unpublish() => Visibility = Visibility.Draft;
+    public void Unpublish() => Visibility = Visibility.Hidden;
 
     /// <summary>
     /// Hides the assessment completely

@@ -51,7 +51,7 @@ public sealed class Order : AggregateRoot<OrderId>
         return Result.Success();
     }
 
-    public Result MarkAsPaid(Purchasing.PaymentMethod method, decimal amountPaid, string? paymobOrderId = null, string? paymobTransactionId = null)
+    public Result MarkAsPaid(PaymentMethod method, decimal amountPaid, string? paymobOrderId = null, string? paymobTransactionId = null)
     {
         if (Status != OrderStatus.Pending && Status != OrderStatus.Processing)
             return Result.Failure(Error.Conflict("ORDER.INVALID_STATUS"));

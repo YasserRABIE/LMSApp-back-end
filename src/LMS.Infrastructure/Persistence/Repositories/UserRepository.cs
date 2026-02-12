@@ -10,7 +10,7 @@ namespace LMS.Infrastructure.Persistence.Repositories;
 /// </summary>
 public sealed class UserRepository : Repository<User, UserId>, IUserRepository
 {
-    public UserRepository(ApplicationDbContext context) : base(context)
+    public UserRepository(LmsDbContext context) : base(context)
     {
     }
 
